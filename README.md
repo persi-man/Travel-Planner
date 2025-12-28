@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Travel Planner
 
-## Getting Started
+<div align="center">
+  <img src="public/assets/logo.png" alt="Travel Planner Logo" width="120" />
+</div>
 
-First, run the development server:
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Status](https://img.shields.io/badge/status-stable-green.svg)
+![Next.js](https://img.shields.io/badge/Next.js-15-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+
+**Travel Planner** is a comprehensive full-stack application designed to simplify the complexity of long-term travel planning. Organize your trips day-by-day, manage budgets, and export your itineraries for offline use—all in a beautifully designed, modern interface.
+
+## ✨ Key Features
+
+- **Intuitive Trip Management**: Create and manage multiple trips with rich details (dates, destinations, cover images).
+- **Smart Timeline**: Automatically generates a day-by-day structure based on your travel dates.
+- **Granular Planning**: Add specific activities, meals, lodging, and travel details with time and cost tracking.
+- **Premium UI/UX**: Built with a custom design system featuring glassmorphism, smooth transitions, and a responsive layout.
+- **Export Functionality**:
+  - 📄 **PDF**: Download printable itineraries.
+  - 📊 **Excel**: Export data for spreadsheet analysis.
+- **Full Persistence**: Data is securely stored using a local SQLite database.
+
+## 📸 Demo
+
+![Dashboard Screenshot](public/assets/demo.png)
+
+## 🚀 Getting Started
+
+See [QUICKSTART.md](./QUICKSTART.md) for detailed installation and setup instructions.
 
 ```bash
+# Quick Setup (Local)
+git clone <repo-url>
+npm install
+npx prisma db push
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Quick Setup (Docker)
+docker-compose up -d --build
+docker-compose exec app npx prisma@6 db push
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📖 Documentation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+For a deep dive into the architecture, database schema, and code structure, please refer to [DOCUMENTATION.md](./DOCUMENTATION.md).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Tech Stack
 
-## Learn More
+- **Frontend**: Next.js (App Router), React, CSS Modules
+- **Backend**: Next.js API Routes
+- **Database**: SQLite, Prisma ORM
+- **Utilities**: jsPDF, SheetJS (xlsx)
 
-To learn more about Next.js, take a look at the following resources:
+## License
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is licensed under the MIT License.

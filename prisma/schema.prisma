@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Trip {
+  id          String   @id @default(uuid())
+  title       String
+  destination String
+  startDate   DateTime
+  endDate     DateTime
+  budget      Float?
+  currency    String?  // e.g. "EUR"
+  coverImage  String?  // URL to image or base64 placeholder
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  days        Day[]
+}
+
+model Day {
+  id         String     @id @default(uuid())
+  date       DateTime
+  tripId     String
+  trip       Trip       @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  note       String?
+  activities Activity[]
+  index      Int        // 0 for Day 1, 1 for Day 2, etc.
+
+  @@unique([tripId, date])
+}
+
+model Activity {
+  id          String   @id @default(uuid())
+  dayId       String
+  day         Day      @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  type        String   // "activity", "food", "lodging", "travel"
+  title       String
+  description String?
+  location    String?
+  startTime   DateTime?
+  endTime     DateTime?
+  cost        Float?
+  currency    String?  // e.g. "EUR", "USD"
+  images      String?  // JSON string of image URLs
+  details     String?  // JSON string for extra details
+  order       Int      @default(0)
+}

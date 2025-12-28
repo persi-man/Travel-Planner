@@ -1,0 +1,122 @@
+.tracker {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.label {
+  font-weight: 600;
+  font-size: 1rem;
+  color: hsl(var(--text-main));
+}
+
+.loading {
+  animation: spin 1s linear infinite;
+  opacity: 0.5;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.progressContainer {
+  height: 8px;
+  background: hsl(var(--border));
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.progressBar {
+  height: 100%;
+  background: linear-gradient(90deg, hsl(142, 76%, 36%), hsl(142, 71%, 45%));
+  border-radius: 4px;
+  transition: width 0.5s ease, background 0.3s;
+}
+
+.progressBar.warning {
+  background: linear-gradient(90deg, hsl(38, 92%, 50%), hsl(45, 93%, 47%));
+}
+
+.progressBar.over {
+  background: linear-gradient(90deg, hsl(0, 72%, 51%), hsl(0, 84%, 60%));
+}
+
+.details {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.spent, .remaining, .total {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.detailLabel {
+  font-size: 0.75rem;
+  color: hsl(var(--text-dim));
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.amount {
+  font-size: 1rem;
+  font-weight: 600;
+  color: hsl(var(--text-main));
+}
+
+.okAmount {
+  color: hsl(142, 76%, 36%);
+}
+
+.warningAmount {
+  color: hsl(38, 92%, 50%);
+}
+
+.overAmount {
+  color: hsl(0, 72%, 51%);
+}
+
+.alert {
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: hsl(0, 72%, 51%, 0.1);
+  border: 1px solid hsl(0, 72%, 51%, 0.3);
+  border-radius: var(--radius-sm);
+  color: hsl(0, 72%, 51%);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.warningAlert {
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: hsl(38, 92%, 50%, 0.1);
+  border: 1px solid hsl(38, 92%, 50%, 0.3);
+  border-radius: var(--radius-sm);
+  color: hsl(38, 92%, 50%);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+@media (max-width: 480px) {
+  .details {
+    gap: 1rem;
+  }
+  
+  .spent, .remaining, .total {
+    flex: 1;
+    min-width: 80px;
+  }
+}

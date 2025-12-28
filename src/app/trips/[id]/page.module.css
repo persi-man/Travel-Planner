@@ -1,0 +1,364 @@
+.main {
+  min-height: 100vh;
+  background-color: hsl(var(--background));
+}
+
+/* Navigation Bar */
+.navBar {
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: hsla(var(--surface) / 0.9);
+  backdrop-filter: blur(10px);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 20;
+}
+
+.homeLink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: hsl(var(--text-main));
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-full);
+  background: hsl(var(--surface));
+  border: 1px solid hsl(var(--border));
+  transition: all 0.2s;
+}
+
+.homeLink:hover {
+  background: hsl(var(--background));
+  transform: translateY(-1px);
+  border-color: hsl(var(--primary));
+}
+
+/* Hero Section */
+.hero {
+  position: relative;
+  height: 400px; /* Taller hero */
+  background-color: hsl(var(--primary));
+  color: white;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.heroImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.7; /* Darker image for text contrast */
+}
+
+.heroOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%);
+}
+
+.heroContent {
+  position: relative;
+  z-index: 10;
+  padding: 2rem;
+  margin-top: 2rem; /* Offset for navbar */
+}
+
+.title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  letter-spacing: -0.02em;
+}
+
+.destination {
+    font-size: 1.5rem;
+    font-weight: 500;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255,255,255,0.1);
+    padding: 0.5rem 1.5rem;
+    border-radius: var(--radius-full);
+    backdrop-filter: blur(4px);
+}
+
+/* Stats Bar */
+.statsBar {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.statItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.statLabel {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.8;
+}
+
+.statValue {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+/* Action Bar */
+.actionBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: hsl(var(--surface));
+  border-bottom: 1px solid hsl(var(--border));
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.actionGroup {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.actionButton {
+  background: hsl(var(--surface));
+  color: hsl(var(--text-main));
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+  border: 1px solid hsl(var(--border));
+  font-size: 0.9rem;
+}
+
+.actionButton:hover {
+  background: hsl(var(--background));
+  transform: translateY(-1px);
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+}
+
+.primaryBtn {
+    background: hsl(var(--primary));
+    color: white;
+    border: none;
+}
+.primaryBtn:hover {
+    background: hsl(var(--primary-dark));
+    color: white;
+    border: none;
+}
+
+.dayCard {
+  background: hsl(var(--surface));
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: 2rem;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+}
+
+.dayHeader {
+  background: hsl(var(--background));
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.dayDate {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: hsl(var(--text-main));
+}
+
+.dayNote {
+  color: hsl(var(--text-dim));
+  font-size: 0.9rem;
+}
+
+.activitiesList {
+  padding: 1rem;
+}
+
+.activityItem {
+  display: grid;
+  grid-template-columns: 30px 80px 1fr auto;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 0.5rem;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: grab;
+  align-items: center;
+}
+
+.activityItem:hover {
+  transform: translateX(4px);
+  border-color: hsl(var(--primary));
+}
+
+.activityItem:active {
+  cursor: grabbing;
+}
+
+.dragHandle {
+  color: hsl(var(--text-dim));
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dragHandle:hover {
+  color: hsl(var(--primary));
+}
+
+.time {
+  font-weight: 600;
+  color: hsl(var(--text-dim));
+  font-size: 0.9rem;
+}
+
+.activityContent h4 {
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  color: hsl(var(--text-main));
+}
+
+.activityContent p {
+  font-size: 0.9rem;
+  color: hsl(var(--text-dim));
+}
+
+.cost {
+  font-weight: 600;
+  color: hsl(var(--accent));
+}
+
+.addActivityBtn {
+  width: 100%;
+  padding: 1rem;
+  background: transparent;
+  border: 2px dashed hsl(var(--border));
+  color: hsl(var(--text-dim));
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  transition: all 0.2s;
+  margin-top: 1rem;
+}
+
+.addActivityBtn:hover {
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+  background: rgba(var(--primary), 0.05);
+}
+
+/* Modal/Form Styles */
+.formOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.formCard {
+  background: hsl(var(--surface));
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 500px;
+  box-shadow: var(--shadow-xl);
+}
+
+.formTitle {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.formField {
+  margin-bottom: 1rem;
+}
+
+.formField label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.formField input, .formField select, .formField textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.cancelBtn {
+  background: transparent;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.saveBtn {
+  background: hsl(var(--primary));
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+}

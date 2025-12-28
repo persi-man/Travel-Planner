@@ -1,0 +1,121 @@
+{
+  "common": {
+    "save": "Save",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "import": "Import",
+    "export": "Export",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "close": "Close",
+    "back": "Back",
+    "home": "Home",
+    "optional": "Optional",
+    "required": "Required",
+    "backToDashboard": "Back to Dashboard"
+  },
+  "home": {
+    "title": "Travel Planner",
+    "subtitle": "Plan your next adventure in style.",
+    "newTrip": "New Trip",
+    "importTrip": "Import Trip",
+    "noTrips": "No trips yet. Create your first adventure!",
+    "tripCard": {
+      "days": "days",
+      "budget": "Budget"
+    }
+  },
+  "trip": {
+    "createTitle": "Create New Trip",
+    "editTitle": "Edit Trip Details",
+    "title": "Trip Title",
+    "titlePlaceholder": "e.g. Summer in Italy",
+    "destination": "Destination",
+    "destinationPlaceholder": "e.g. Rome, Florence, Venice",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "budget": "Budget",
+    "currency": "Currency",
+    "coverImage": "Cover Image",
+    "uploadFromDevice": "Upload from Device",
+    "uploadNewCover": "Upload New Cover",
+    "removeImage": "Remove Image",
+    "createButton": "Create Trip",
+    "creating": "Creating...",
+    "deleteConfirm": "Are you sure you want to delete this trip? This action cannot be undone.",
+    "day": "Day",
+    "dates": "Dates",
+    "duration": "Duration",
+    "days": "Days"
+  },
+  "activity": {
+    "addTitle": "Add Activity",
+    "editTitle": "Edit Activity",
+    "title": "Title",
+    "saveActivity": "Save Activity",
+    "day": "Day",
+    "selectDay": "Select a Day...",
+    "time": "Time",
+    "type": "Type",
+    "location": "Location",
+    "locationPlaceholder": "Enter location...",
+    "cost": "Cost",
+    "costAndCurrency": "Cost & Currency",
+    "description": "Description",
+    "images": "Images",
+    "uploadImages": "Upload Images",
+    "addImage": "Add Image",
+    "noActivities": "No activities yet. Drop here!",
+    "deleteConfirm": "Delete this activity?",
+    "types": {
+      "activity": "Activity",
+      "food": "Food",
+      "travel": "Travel",
+      "lodging": "Lodging",
+      "custom": "Custom..."
+    }
+  },
+  "budget": {
+    "title": "Budget",
+    "spent": "Spent",
+    "remaining": "Remaining",
+    "overBudget": "Over budget by",
+    "used": "of budget used"
+  },
+  "export": {
+    "title": "Export",
+    "json": "JSON (reimportable)",
+    "markdown": "Markdown",
+    "pdf": "PDF",
+    "excel": "Excel",
+    "text": "Text",
+    "mapsRoute": "Maps Route",
+    "calendar": "Calendar (.ics)",
+    "googleCalendar": "Google Calendar"
+  },
+  "import": {
+    "success": "imported successfully!",
+    "activitiesImported": "activities imported.",
+    "parseError": "Could not parse data from file. Please check the format.",
+    "failed": "Import failed. Please try again."
+  },
+  "dates": {
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "days": "days"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "language": {
+    "select": "Language",
+    "en": "English",
+    "fr": "Français"
+  }
+}
