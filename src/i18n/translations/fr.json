@@ -1,0 +1,121 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "saveChanges": "Enregistrer les modifications",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "import": "Importer",
+    "export": "Exporter",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "close": "Fermer",
+    "back": "Retour",
+    "home": "Accueil",
+    "optional": "Optionnel",
+    "required": "Requis",
+    "backToDashboard": "Retour au tableau de bord"
+  },
+  "home": {
+    "title": "Travel Planner",
+    "subtitle": "Planifiez votre prochaine aventure avec style.",
+    "newTrip": "Nouveau Voyage",
+    "importTrip": "Importer un Voyage",
+    "noTrips": "Aucun voyage pour le moment. Créez votre première aventure !",
+    "tripCard": {
+      "days": "jours",
+      "budget": "Budget"
+    }
+  },
+  "trip": {
+    "createTitle": "Créer un Nouveau Voyage",
+    "editTitle": "Modifier les Détails du Voyage",
+    "title": "Titre du Voyage",
+    "titlePlaceholder": "ex. Été en Italie",
+    "destination": "Destination",
+    "destinationPlaceholder": "ex. Rome, Florence, Venise",
+    "startDate": "Date de Début",
+    "endDate": "Date de Fin",
+    "budget": "Budget",
+    "currency": "Devise",
+    "coverImage": "Image de Couverture",
+    "uploadFromDevice": "Télécharger depuis l'appareil",
+    "uploadNewCover": "Télécharger une nouvelle image",
+    "removeImage": "Supprimer l'image",
+    "createButton": "Créer le Voyage",
+    "creating": "Création en cours...",
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce voyage ? Cette action est irréversible.",
+    "day": "Jour",
+    "dates": "Dates",
+    "duration": "Durée",
+    "days": "Jours"
+  },
+  "activity": {
+    "addTitle": "Ajouter une Activité",
+    "editTitle": "Modifier l'Activité",
+    "title": "Titre",
+    "saveActivity": "Enregistrer l'Activité",
+    "day": "Jour",
+    "selectDay": "Sélectionner un jour...",
+    "time": "Heure",
+    "type": "Type",
+    "location": "Lieu",
+    "locationPlaceholder": "Entrez un lieu...",
+    "cost": "Coût",
+    "costAndCurrency": "Coût & Devise",
+    "description": "Description",
+    "images": "Images",
+    "uploadImages": "Télécharger des images",
+    "addImage": "Ajouter une image",
+    "noActivities": "Pas encore d'activités. Déposez ici !",
+    "deleteConfirm": "Supprimer cette activité ?",
+    "types": {
+      "activity": "Activité",
+      "food": "Repas",
+      "travel": "Transport",
+      "lodging": "Hébergement",
+      "custom": "Personnalisé..."
+    }
+  },
+  "budget": {
+    "title": "Budget",
+    "spent": "Dépensé",
+    "remaining": "Restant",
+    "overBudget": "Dépassement de",
+    "used": "du budget utilisé"
+  },
+  "export": {
+    "title": "Exporter",
+    "json": "JSON (réimportable)",
+    "markdown": "Markdown",
+    "pdf": "PDF",
+    "excel": "Excel",
+    "text": "Texte",
+    "mapsRoute": "Itinéraire Maps",
+    "calendar": "Calendrier (.ics)",
+    "googleCalendar": "Google Agenda"
+  },
+  "import": {
+    "success": "importé avec succès !",
+    "activitiesImported": "activités importées.",
+    "parseError": "Impossible de lire les données du fichier. Vérifiez le format.",
+    "failed": "Échec de l'import. Veuillez réessayer."
+  },
+  "dates": {
+    "today": "Aujourd'hui",
+    "tomorrow": "Demain",
+    "days": "jours"
+  },
+  "theme": {
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système"
+  },
+  "language": {
+    "select": "Langue",
+    "en": "English",
+    "fr": "Français"
+  }
+}

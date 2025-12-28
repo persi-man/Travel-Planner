@@ -1,0 +1,77 @@
+.wrapper {
+  position: relative;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  background: hsl(var(--surface));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.trigger:hover {
+  background: hsl(var(--primary) / 0.1);
+  border-color: hsl(var(--primary) / 0.3);
+}
+
+.flag {
+  font-size: 1.2rem;
+}
+
+.arrow {
+  font-size: 0.6rem;
+  color: hsl(var(--text-dim));
+}
+
+.dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.25rem;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  min-width: 140px;
+  overflow: hidden;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+  color: hsl(var(--text-main));
+  text-align: left;
+}
+
+.option:not(:first-child) {
+  border-top: 1px solid hsl(var(--border));
+}
+
+.option:hover {
+  background: hsl(var(--primary) / 0.1);
+}
+
+.option.active {
+  background: hsl(var(--primary) / 0.15);
+}
+
+.optionFlag {
+  font-size: 1.1rem;
+}
+
+.optionName {
+  font-size: 0.9rem;
+}

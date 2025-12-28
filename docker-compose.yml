@@ -1,0 +1,18 @@
+version: '3.9'
+
+services:
+  app:
+    container_name: travel-planner-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./dev.db:/app/dev.db
+    environment:
+      - DATABASE_URL=file:./dev.db
+    # but for standalone output we simply run node server.js. 
+    # To handle migrations in production, you ideally run them in the build or a separate init container.
+    # For this simple SQLite setup, we can stick to the default CMD.
+
