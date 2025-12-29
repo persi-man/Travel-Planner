@@ -32,7 +32,7 @@ See [QUICKSTART.md](./QUICKSTART.md) for detailed installation and setup instruc
 
 ```bash
 # Quick Setup (Local)
-git clone <repo-url>
+git clone https://github.com/persi-man/Travel-Planner
 npm install
 npx prisma db push
 npm run dev
@@ -44,7 +44,7 @@ docker-compose exec app npx prisma@6 db push
 
 ## 📖 Documentation
 
-For a deep dive into the architecture, database schema, and code structure, please refer to [DOCUMENTATION.md](./DOCUMENTATION.md).
+For a deep dive into the architecture, database schema, and code structure, please refer to [DOCUMENTATION](./DOCUMENTATION.md).
 
 ## 🛠️ Tech Stack
 
@@ -55,4 +55,4 @@ For a deep dive into the architecture, database schema, and code structure, plea
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](./LICENSE.md).
