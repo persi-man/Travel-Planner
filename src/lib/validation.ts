@@ -1,34 +1,32 @@
 const MAX_TITLE = 200;
 const MAX_DESTINATION = 500;
+const MAX_COUNTRIES = 12;
 const MAX_DESCRIPTION = 5000;
-const MAX_COVER_IMAGE_BYTES = 500_000;
-const MAX_ACTIVITY_IMAGE_BYTES = 200_000;
 const MAX_ACTIVITY_IMAGES = 10;
 const MAX_IMPORT_FILE_BYTES = 5_000_000;
 const MAX_IMPORT_ROWS = 10_000;
 
 export function isSafeImageSrc(src: string): boolean {
   if (!src || typeof src !== 'string') return false;
-  return /^data:image\/(jpeg|jpg|png|webp|gif);base64,/i.test(src);
+  return /^data:image\/[a-z0-9+.-]+;base64,/i.test(src);
 }
 
 export function sanitizeCoverImage(coverImage?: string | null): string | null {
   if (!coverImage) return null;
   if (!isSafeImageSrc(coverImage)) return null;
-  if (coverImage.length > MAX_COVER_IMAGE_BYTES) return null;
   return coverImage;
 }
 
 export function sanitizeImageArray(images: string[]): string[] {
   return images
     .filter(isSafeImageSrc)
-    .filter((img) => img.length <= MAX_ACTIVITY_IMAGE_BYTES)
     .slice(0, MAX_ACTIVITY_IMAGES);
 }
 
 export function validateTripInput(input: {
   title?: string;
   destination?: string;
+  countries?: { code: string; name: string }[];
   startDate?: string;
   endDate?: string;
   budget?: string | number | null;
@@ -50,8 +48,29 @@ export function validateTripInput(input: {
   if (destination.length > MAX_DESTINATION) {
     return { ok: false, error: 'Destination too long' };
   }
-  if (input.coverImage && !sanitizeCoverImage(input.coverImage)) {
-    return { ok: false, error: 'Invalid cover image' };
+
+  if (input.countries !== undefined) {
+    const codes = new Set<string>();
+    for (const country of input.countries) {
+      const code = country.code?.trim().toLowerCase();
+      const name = country.name?.trim();
+      if (!code || code.length !== 2 || !name) {
+        return { ok: false, error: 'Invalid country' };
+      }
+      if (codes.has(code)) {
+        return { ok: false, error: 'Duplicate country' };
+      }
+      codes.add(code);
+    }
+    if (codes.size === 0) {
+      return { ok: false, error: 'At least one country required' };
+    }
+    if (codes.size > MAX_COUNTRIES) {
+      return { ok: false, error: 'Too many countries' };
+    }
+  }
+  if (input.coverImage !== undefined && input.coverImage && !isSafeImageSrc(input.coverImage)) {
+    return { ok: false, error: 'Unsupported cover image format.' };
   }
   return { ok: true };
 }

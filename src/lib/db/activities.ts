@@ -131,6 +131,7 @@ export async function updateActivity(input: UpdateActivityInput): Promise<Activi
     description: input.description !== undefined ? input.description : current.description,
     location: input.location !== undefined ? input.location : current.location,
     startTime: input.startTime !== undefined ? input.startTime : current.startTime,
+    endTime: input.endTime !== undefined ? input.endTime : current.endTime,
     cost:
       input.cost !== undefined
         ? input.cost != null && input.cost !== ''

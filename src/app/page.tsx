@@ -6,8 +6,10 @@ import * as XLSX from 'xlsx';
 import { useLanguage } from '@/i18n/LanguageContext';
 import LocalDataBanner from '@/components/LocalDataBanner';
 import AppHeader from '@/components/AppHeader';
+import Logo from '@/components/Logo';
 import { listTrips, createTrip, createActivity, type TripListItem } from '@/lib/db';
-import { validateImportFile, validateImportRowCount } from '@/lib/validation';
+import { formatCountriesLabel } from '@/lib/countries';
+import { validateImportFile, validateImportRowCount, isSafeImageSrc } from '@/lib/validation';
 import styles from './page.module.css';
 
 function formatDestination(destination: string) {
@@ -392,7 +394,7 @@ export default function Home() {
     <main className={styles.main}>
       <div className={styles.container}>
         <div className={styles.topRow}>
-          <h1 className={styles.title}>{t('home.title')}</h1>
+          <Logo variant="full" wordmark={t('home.title')} />
           <AppHeader />
         </div>
 
@@ -427,41 +429,37 @@ export default function Home() {
             </Link>
           </div>
         ) : (
-          <ul className={styles.tripList}>
-            {trips.map((trip, index) => {
+          <ul className={styles.tripGrid}>
+            {trips.map((trip) => {
               const days = Math.ceil(
                 (new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) /
                   (1000 * 60 * 60 * 24)
               );
               const dateFmt = language === 'fr' ? 'fr-FR' : 'en-US';
-              const start = new Date(trip.startDate).toLocaleDateString(dateFmt, {
-                day: 'numeric',
-                month: 'short',
-              });
-              const end = new Date(trip.endDate).toLocaleDateString(dateFmt, {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-              });
+              const start = new Date(trip.startDate).toLocaleDateString(dateFmt);
+              const end = new Date(trip.endDate).toLocaleDateString(dateFmt);
 
               return (
                 <li key={trip.id}>
-                  <Link href={`/trips/${trip.id}`} className={styles.tripRow}>
-                    <span className={styles.tripIndex} aria-hidden>
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <div className={styles.tripBody}>
-                      <div className={styles.tripName}>{trip.title}</div>
-                      <div className={styles.tripMeta}>
-                        {formatDestination(trip.destination)}
-                        {' · '}
-                        {days} {t('home.tripCard.days')}
+                  <Link href={`/trips/${trip.id}`} className={styles.card}>
+                    <div className={styles.cardCover}>
+                      {trip.coverImage && isSafeImageSrc(trip.coverImage) ? (
+                        <img src={trip.coverImage} alt="" className={styles.cardImage} />
+                      ) : (
+                        <div className={styles.cardPlaceholder} aria-hidden />
+                      )}
+                      <div className={styles.dateBadge}>
+                        {start} – {end}
                       </div>
-                      <span className={styles.tripDates}>
-                        {start} → {end}
-                      </span>
                     </div>
-                    <span className={styles.tripArrow} aria-hidden>→</span>
+                    <div className={styles.cardBody}>
+                      <h2 className={styles.cardTitle}>{trip.title}</h2>
+                      <p className={styles.cardMeta}>
+                        {formatCountriesLabel(trip.countries, formatDestination(trip.destination))}
+                        <span className={styles.metaSep} aria-hidden>·</span>
+                        {days} {t('home.tripCard.days')}
+                      </p>
+                    </div>
                   </Link>
                 </li>
               );

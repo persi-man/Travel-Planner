@@ -7,6 +7,7 @@ import type {
   UpdateTripInput,
 } from './types';
 import { sanitizeCoverImage, validateTripInput } from '../validation';
+import { countriesToDestination, normalizeCountries } from '../countries';
 
 function newId(): string {
   return crypto.randomUUID();
@@ -37,6 +38,7 @@ export async function listTrips(): Promise<TripListItem[]> {
       id: trip.id,
       title: trip.title,
       destination: trip.destination,
+      countries: trip.countries,
       startDate: trip.startDate,
       endDate: trip.endDate,
       coverImage: trip.coverImage,
@@ -68,10 +70,17 @@ export async function createTrip(input: CreateTripInput): Promise<Trip> {
   const start = new Date(input.startDate);
   const end = new Date(input.endDate);
 
+  const countries = normalizeCountries(input.countries);
+  const destination =
+    countries.length > 0
+      ? countriesToDestination(countries)
+      : (input.destination ?? '').trim();
+
   const trip: Trip = {
     id,
     title: input.title.trim(),
-    destination: (input.destination ?? '').trim(),
+    destination,
+    countries,
     startDate: start.toISOString(),
     endDate: end.toISOString(),
     budget: input.budget != null && input.budget !== '' ? parseFloat(String(input.budget)) : null,
@@ -93,12 +102,22 @@ export async function updateTrip(id: string, input: UpdateTripInput): Promise<Tr
   const validation = validateTripInput({
     title: input.title ?? current.title,
     destination: input.destination ?? current.destination,
+    countries: input.countries ?? current.countries,
     startDate: input.startDate ?? current.startDate,
     endDate: input.endDate ?? current.endDate,
     budget: input.budget ?? current.budget,
-    coverImage: input.coverImage !== undefined ? input.coverImage : current.coverImage,
+    ...(input.coverImage !== undefined ? { coverImage: input.coverImage } : {}),
   });
   if (!validation.ok) throw new Error(validation.error);
+
+  const countries =
+    input.countries !== undefined
+      ? normalizeCountries(input.countries)
+      : normalizeCountries(current.countries);
+  const destination =
+    countries.length > 0
+      ? countriesToDestination(countries)
+      : (input.destination?.trim() ?? current.destination);
 
   const newStart = input.startDate ? new Date(input.startDate) : new Date(current.startDate);
   const newEnd = input.endDate ? new Date(input.endDate) : new Date(current.endDate);
@@ -149,7 +168,8 @@ export async function updateTrip(id: string, input: UpdateTripInput): Promise<Tr
   const updated: Trip = {
     ...current,
     title: input.title?.trim() ?? current.title,
-    destination: input.destination?.trim() ?? current.destination,
+    destination,
+    countries,
     startDate: newStart.toISOString(),
     endDate: newEnd.toISOString(),
     budget:
@@ -159,7 +179,11 @@ export async function updateTrip(id: string, input: UpdateTripInput): Promise<Tr
           : null
         : current.budget,
     coverImage:
-      input.coverImage !== undefined ? sanitizeCoverImage(input.coverImage) : current.coverImage,
+      input.coverImage !== undefined
+        ? input.coverImage
+          ? sanitizeCoverImage(input.coverImage)
+          : null
+        : current.coverImage,
     updatedAt: new Date().toISOString(),
     days,
   };

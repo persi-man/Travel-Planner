@@ -1,0 +1,83 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: hsl(var(--ink));
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .logo:hover .wordmark {
+    color: hsl(var(--stamp));
+  }
+
+  .logo:hover .pin {
+    fill: hsl(var(--stamp-hover));
+  }
+
+  .logo:hover .suitcase {
+    fill: hsl(var(--stamp) / 0.28);
+  }
+}
+
+.full {
+  gap: 0.85rem;
+}
+
+.compact {
+  gap: 0.55rem;
+}
+
+.mark {
+  display: block;
+  flex-shrink: 0;
+}
+
+.pin {
+  fill: hsl(var(--stamp));
+  transition: fill 0.15s var(--ease-out);
+}
+
+.pinHole {
+  fill: hsl(var(--paper-raised));
+}
+
+.handle {
+  stroke: hsl(var(--ink));
+  stroke-width: 1.75;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.suitcase {
+  stroke: hsl(var(--stamp));
+  stroke-width: 1.75;
+  fill: hsl(var(--stamp) / 0.16);
+  transition: fill 0.15s var(--ease-out);
+}
+
+.clasp {
+  stroke: hsl(var(--stamp));
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  opacity: 0.75;
+}
+
+.wordmark {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  transition: color 0.15s var(--ease-out);
+}
+
+.full .wordmark {
+  font-size: clamp(2.25rem, 7vw, 3.25rem);
+}
+
+.compact .wordmark {
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+}

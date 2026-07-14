@@ -9,6 +9,9 @@ interface LocationSuggestion {
   lat: string;
   lon: string;
   place_id: number;
+  address?: {
+    country_code?: string;
+  };
 }
 
 interface LocationInputProps {
@@ -18,6 +21,7 @@ interface LocationInputProps {
   required?: boolean;
   className?: string;
   language?: string;
+  countryCodes?: string[];
 }
 
 function formatSuggestion(displayName: string) {
@@ -35,6 +39,7 @@ export default function LocationInput({
   required = false,
   className = '',
   language = 'en',
+  countryCodes,
 }: LocationInputProps) {
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -63,9 +68,13 @@ export default function LocationInput({
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`,
-        {
+      const codes = countryCodes?.map((c) => c.toLowerCase()).filter(Boolean);
+      let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=8&addressdetails=1`;
+      if (codes?.length) {
+        url += `&countrycodes=${codes.join(',')}`;
+      }
+
+      const response = await fetch(url, {
           headers: {
             'Accept-Language': language === 'fr' ? 'fr' : 'en',
             'User-Agent': 'TravelPlannerApp/1.0',
@@ -74,9 +83,16 @@ export default function LocationInput({
       );
 
       if (response.ok) {
-        const data = await response.json();
-        setSuggestions(data);
-        setShowSuggestions(data.length > 0);
+        const data: LocationSuggestion[] = await response.json();
+        const filtered =
+          codes?.length
+            ? data.filter((item) => {
+                const code = item.address?.country_code?.toLowerCase();
+                return code && codes.includes(code);
+              })
+            : data;
+        setSuggestions(filtered);
+        setShowSuggestions(filtered.length > 0);
       }
     } catch (error) {
       console.error('Error fetching locations:', error);

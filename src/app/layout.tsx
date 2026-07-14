@@ -16,7 +16,7 @@ const literata = Literata({
 });
 
 export const metadata: Metadata = {
-  title: "Voyages",
+  title: "Travel Planner",
   description: "Carnet de voyages local.",
 };
 
@@ -25,6 +25,7 @@ const cspContent = [
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdnjs.cloudflare.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
+  "worker-src 'self' blob:",
   "connect-src 'self' api.exchangerate-api.com nominatim.openstreetmap.org",
   "frame-ancestors 'none'",
   "base-uri 'self'",

@@ -3,16 +3,17 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
-import { Trash2, Edit2, Upload, X, GripVertical } from 'lucide-react';
+import { Trash2, Edit2, Upload, X, GripVertical, MapPin } from 'lucide-react';
 import { DndContext, DragEndEvent, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import LocationInput from '@/components/LocationInput';
+import CountryInput from '@/components/CountryInput';
 import BudgetTracker from '@/components/BudgetTracker';
+import { formatCountriesLabel, getCountryCodes } from '@/lib/countries';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import ThemeToggle from '@/components/ThemeToggle';
+import Logo from '@/components/Logo';
 import { useLanguage } from '@/i18n/LanguageContext';
 import {
   getTripById,
@@ -27,6 +28,24 @@ import {
 } from '@/lib/db';
 import { safeParseImageArray } from '@/lib/safeJson';
 import { isSafeImageSrc, validateImportFile } from '@/lib/validation';
+import { readImageFile } from '@/lib/imageUtils';
+import {
+  computeActivityTimes,
+  DURATION_OPTIONS,
+  durationMinutesFromActivity,
+  formatActivityDuration,
+  formatActivityTimeRange,
+  formatDurationLabel,
+  timeStringFromIso,
+} from '@/lib/activityTime';
+import { generateTripPdf } from '@/lib/pdfItinerary';
+import {
+  EXPORT_APP_NAME,
+  EXPORT_WEBSITE,
+  getExportAttributionLine,
+  getExportFooterLine,
+  getExportFooterMarkdown,
+} from '@/lib/exportBranding';
 import styles from './page.module.css';
 
 // Helper function to extract text from PDF
@@ -105,6 +124,8 @@ export default function TripDetailsClient({ id }: { id: string }) {
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const importFileRef = useRef<HTMLInputElement>(null);
+  const activityImageInputRef = useRef<HTMLInputElement>(null);
+  const tripCoverInputRef = useRef<HTMLInputElement>(null);
   const { t, language } = useLanguage();
 
   // Form State
@@ -117,6 +138,7 @@ export default function TripDetailsClient({ id }: { id: string }) {
     // startTime is now calculated from day + time
     dayId: '', 
     time: '',
+    durationMinutes: '',
     cost: '',
     currency: 'EUR',
     location: '',
@@ -125,6 +147,7 @@ export default function TripDetailsClient({ id }: { id: string }) {
 
   const [tripForm, setTripForm] = useState({
       title: '',
+      countries: [] as { code: string; name: string }[],
       destination: '',
       startDate: '',
       endDate: '',
@@ -159,24 +182,15 @@ export default function TripDetailsClient({ id }: { id: string }) {
       // Handle image splitting (pipe separated because base64 contains commas)
       const imageArray = form.images ? form.images.split('|').map(s => s.trim()).filter(Boolean) : [];
 
-      // Calculate startTime from selected Day and Time
-      let startDateTime = null;
-      if (form.dayId) {
-          const day = trip?.days.find(d => d.id === form.dayId);
-          if (day) {
-              const dateBase = new Date(day.date);
-              if (form.time) {
-                  const [hours, minutes] = form.time.split(':').map(Number);
-                  dateBase.setHours(hours, minutes);
-              } else {
-                  // Default to noon or keep time? If time is optional, maybe just date is enough.
-                  // But our DB stores DateTime.
-                  // Let's set it to 00:00 or what logic dictates.
-                  // If optional time and user didn't provide, we might just store date with 00:00
-                  dateBase.setHours(0,0,0,0);
-              }
-              startDateTime = dateBase.toISOString();
-          }
+      let startDateTime: string | null = null;
+      let endDateTime: string | null = null;
+      if (form.dayId && form.time) {
+        const day = trip?.days.find((d) => d.id === form.dayId);
+        if (day) {
+          const times = computeActivityTimes(day.date, form.time, form.durationMinutes);
+          startDateTime = times.startTime;
+          endDateTime = times.endTime;
+        }
       }
 
       if (form.id) {
@@ -188,6 +202,7 @@ export default function TripDetailsClient({ id }: { id: string }) {
           description: form.description,
           location: form.location,
           startTime: startDateTime,
+          endTime: endDateTime,
           cost: form.cost ? parseFloat(form.cost) : 0,
           currency: form.currency,
           images: imageArray,
@@ -200,14 +215,14 @@ export default function TripDetailsClient({ id }: { id: string }) {
           description: form.description,
           location: form.location,
           startTime: startDateTime,
+          endTime: endDateTime,
           cost: form.cost ? parseFloat(form.cost) : 0,
           currency: form.currency,
           images: imageArray,
         });
       }
       setShowAddModal(false);
-      // Reset form
-      setForm({ id: '', type: 'activity', customType: '', title: '', description: '', dayId: '', time: '', cost: '', currency: 'EUR', location: '', images: '' });
+      setForm({ id: '', type: 'activity', customType: '', title: '', description: '', dayId: '', time: '', durationMinutes: '', cost: '', currency: 'EUR', location: '', images: '' });
       fetchTrip();
     } catch (err) {
       console.error(err);
@@ -217,13 +232,41 @@ export default function TripDetailsClient({ id }: { id: string }) {
   const handleEditTrip = async (e: React.FormEvent) => {
       e.preventDefault();
       if (!trip) return;
-      
+      if (tripForm.countries.length === 0) {
+        alert(t('trip.countriesRequired'));
+        return;
+      }
+
       try {
-        await updateTrip(id, tripForm);
+        const updates: {
+          title: string;
+          countries: typeof tripForm.countries;
+          startDate: string;
+          endDate: string;
+          budget: string;
+          coverImage?: string | null;
+        } = {
+          title: tripForm.title,
+          countries: tripForm.countries,
+          startDate: tripForm.startDate,
+          endDate: tripForm.endDate,
+          budget: tripForm.budget,
+        };
+
+        const originalCover = trip.coverImage ?? '';
+        if (tripForm.coverImage !== originalCover) {
+          updates.coverImage = tripForm.coverImage || null;
+        }
+
+        await updateTrip(id, updates);
         setShowEditTripModal(false);
         fetchTrip();
       } catch (err) {
         console.error(err);
+        const message = err instanceof Error ? err.message : '';
+        if (message.includes('Cover image') || message.includes('cover image')) {
+          alert(t('trip.coverImageError'));
+        }
       }
   };
 
@@ -231,6 +274,7 @@ export default function TripDetailsClient({ id }: { id: string }) {
       if(!trip) return;
       setTripForm({
           title: trip.title,
+          countries: trip.countries ?? [],
           destination: trip.destination || '',
           startDate: trip.startDate ? new Date(trip.startDate).toISOString().split('T')[0] : '',
           endDate: trip.endDate ? new Date(trip.endDate).toISOString().split('T')[0] : '',
@@ -241,12 +285,6 @@ export default function TripDetailsClient({ id }: { id: string }) {
   };
 
   const handleEditActivityClick = (act: Activity, dayId: string) => {
-      let timeStr = '';
-      if (act.startTime) {
-          const d = new Date(act.startTime);
-          timeStr = d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
-      }
-
       setForm({
           id: act.id,
           type: act.type,
@@ -254,7 +292,8 @@ export default function TripDetailsClient({ id }: { id: string }) {
           title: act.title,
           description: act.description || '',
           dayId: dayId,
-          time: timeStr,
+          time: timeStringFromIso(act.startTime),
+          durationMinutes: durationMinutesFromActivity(act),
           cost: act.cost ? act.cost.toString() : '',
           currency: act.currency || 'EUR',
           location: act.location || '',
@@ -263,16 +302,18 @@ export default function TripDetailsClient({ id }: { id: string }) {
       setShowAddModal(true);
   };
 
-  const handleTripImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTripImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
-      const reader = new FileReader();
-      reader.onloadend = () => {
-          if (reader.result) {
-              setTripForm(prev => ({ ...prev, coverImage: reader.result as string }));
-          }
-      };
-      reader.readAsDataURL(file);
+
+      try {
+        const dataUrl = await readImageFile(file);
+        setTripForm((prev) => ({ ...prev, coverImage: dataUrl }));
+      } catch {
+        alert(t('trip.coverImageError'));
+      } finally {
+        e.target.value = '';
+      }
   };
 
   const handleDeleteTrip = async () => {
@@ -323,206 +364,47 @@ export default function TripDetailsClient({ id }: { id: string }) {
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files;
-      if (!files) return;
+      if (!files || files.length === 0) return;
 
-      Array.from(files).forEach(file => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-              if (reader.result) {
-                  const currentImages = form.images ? form.images.split('|').filter(Boolean) : [];
-                  currentImages.push(reader.result as string);
-                  setForm(prev => ({ ...prev, images: currentImages.join('|') }));
-              }
-          };
-          reader.readAsDataURL(file);
-      });
+      const uploads = Array.from(files);
+      const added: string[] = [];
+      let failed = 0;
+
+      for (const file of uploads) {
+        try {
+          added.push(await readImageFile(file));
+        } catch (error) {
+          failed += 1;
+          console.error('Image upload failed:', file.name, file.type, file.size, error);
+        }
+      }
+
+      if (added.length > 0) {
+        setForm((prev) => {
+          const currentImages = prev.images ? prev.images.split('|').filter(Boolean) : [];
+          return { ...prev, images: [...currentImages, ...added].join('|') };
+        });
+      }
+
+      if (failed > 0) {
+        const hasEmptyFile = uploads.some((file) => file.size === 0);
+        alert(
+          failed === uploads.length
+            ? hasEmptyFile
+              ? t('activity.imageEmptyError')
+              : t('activity.imageError')
+            : t('activity.imagePartialError')
+        );
+      }
+
+      e.target.value = '';
   };
 
-  const exportPDF = () => {
+  const exportPDF = async () => {
     if (!trip) return;
-    const doc = new jsPDF();
-    
-    let yPos = 0;
-    
-    // Hero Header with cover image or gradient
-    if (trip.coverImage && trip.coverImage.startsWith('data:image')) {
-      try {
-        // Full width cover image as hero
-        doc.addImage(trip.coverImage, 'JPEG', 0, 0, 210, 60);
-        // Draw semi-transparent overlay manually
-        doc.setFillColor(0, 0, 0);
-        doc.rect(0, 40, 210, 20, 'F');
-      } catch (e) {
-        // Fallback to gradient
-        doc.setFillColor(41, 128, 185);
-        doc.rect(0, 0, 210, 60, 'F');
-      }
-    } else {
-      // Default blue header
-      doc.setFillColor(41, 128, 185);
-      doc.rect(0, 0, 210, 60, 'F');
-    }
-    
-    // Title overlay on hero
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(28);
-    doc.setFont("helvetica", "bold");
-    doc.text(trip.title, 14, 25);
-    
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "normal");
-    doc.text(trip.destination, 14, 38);
-    
-    doc.setFontSize(11);
-    doc.text(`${new Date(trip.startDate).toLocaleDateString()} - ${new Date(trip.endDate).toLocaleDateString()}`, 14, 50);
-    
-    if (trip.budget) {
-      doc.text(`Budget: ${trip.budget} ${trip.currency || 'EUR'}`, 180, 50, { align: 'right' });
-    }
-
-    yPos = 70;
-
-    // Filter days with activities
-    const daysWithActivities = trip.days.filter(day => day.activities.length > 0);
-    
-    if (daysWithActivities.length === 0) {
-      doc.setTextColor(100, 100, 100);
-      doc.setFontSize(14);
-      doc.text('No activities planned yet.', 14, yPos);
-    }
-    
-    daysWithActivities.forEach((day) => {
-      // Check for page break before day header
-      if (yPos > 240) {
-        doc.addPage();
-        yPos = 20;
-      }
-
-      // Day Header - styled bar
-      doc.setFillColor(41, 128, 185);
-      doc.rect(14, yPos - 5, 182, 12, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "bold");
-      doc.text(`Day ${day.index + 1} - ${new Date(day.date).toLocaleDateString(undefined, {weekday:'long', day:'numeric', month:'long'})}`, 18, yPos + 3);
-      yPos += 16;
-
-      // Sort activities by time
-      const sortedActivities = [...day.activities].sort((a, b) => {
-        if (!a.startTime) return 1;
-        if (!b.startTime) return -1;
-        return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
-      });
-
-      sortedActivities.forEach((act) => {
-        // Check for page break
-        if (yPos > 255) {
-          doc.addPage();
-          yPos = 20;
-        }
-
-        // Activity card background
-        doc.setFillColor(248, 249, 250);
-        doc.roundedRect(14, yPos - 3, 182, act.images ? 38 : 22, 2, 2, 'F');
-        
-        // Time badge
-        const timeStr = act.startTime ? new Date(act.startTime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
-        if (timeStr) {
-          doc.setFillColor(41, 128, 185);
-          doc.roundedRect(16, yPos - 1, 18, 6, 1, 1, 'F');
-          doc.setTextColor(255, 255, 255);
-          doc.setFontSize(8);
-          doc.setFont("helvetica", "bold");
-          doc.text(timeStr, 25, yPos + 3, { align: 'center' });
-        }
-        
-        // Activity title
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(11);
-        doc.setTextColor(30, 30, 30);
-        doc.text(act.title, timeStr ? 38 : 18, yPos + 3);
-        
-        // Type badge
-        doc.setFillColor(230, 230, 230);
-        doc.roundedRect(165, yPos - 1, 28, 6, 1, 1, 'F');
-        doc.setTextColor(80, 80, 80);
-        doc.setFontSize(7);
-        doc.setFont("helvetica", "normal");
-        doc.text(act.type.toUpperCase(), 179, yPos + 3, { align: 'center' });
-        
-        yPos += 8;
-
-        // Location with link (no emoji, use text)
-        if (act.location) {
-          doc.setFontSize(9);
-          doc.setTextColor(41, 128, 185);
-          doc.setFont("helvetica", "normal");
-          doc.textWithLink(`> ${act.location} (View on Maps)`, 18, yPos, {
-            url: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(act.location)}`
-          });
-          yPos += 5;
-        }
-
-        // Description (full text with proper line wrapping)
-        if (act.description) {
-          doc.setFontSize(8);
-          doc.setTextColor(80, 80, 80);
-          const descLines = doc.splitTextToSize(act.description, 175);
-          doc.text(descLines, 18, yPos);
-          yPos += descLines.length * 4;
-        }
-
-        // Cost
-        if (act.cost) {
-          doc.setFontSize(9);
-          doc.setTextColor(34, 139, 34);
-          doc.setFont("helvetica", "bold");
-          doc.text(`${act.cost} ${act.currency || 'EUR'}`, 18, yPos);
-          yPos += 4;
-        }
-
-        // Activity images (max 3, side by side)
-        if (act.images) {
-          try {
-            const imgArray = safeParseImageArray(act.images as unknown as string);
-            if (imgArray.length > 0) {
-              let imgX = 18;
-              imgArray.slice(0, 4).forEach((imgSrc: string) => {
-                if (imgSrc && imgSrc.startsWith('data:image')) {
-                  try {
-                    doc.addImage(imgSrc, 'JPEG', imgX, yPos, 30, 22);
-                    imgX += 34;
-                  } catch (e) {
-                    // Skip
-                  }
-                }
-              });
-              yPos += 26;
-            }
-          } catch (e) {
-            // Images not parseable
-          }
-        }
-
-        yPos += 8;
-      });
-
-      yPos += 6;
-    });
-
-    // Footer on all pages
-    const pageCount = doc.getNumberOfPages();
-    for(let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(150, 150, 150);
-        doc.text('Travel Planner', 14, 288);
-        doc.text(`Page ${i}/${pageCount}`, 196, 288, { align: 'right' });
-    }
-
-    doc.save(`${trip.title.replace(/\s+/g, '_')}_itinerary.pdf`);
+    await generateTripPdf(trip, language);
   };
 
   const exportExcel = () => {
@@ -540,7 +422,8 @@ export default function TripDetailsClient({ id }: { id: string }) {
               data.push({
                   Date: new Date(day.date).toLocaleDateString(),
                   Day: `Day ${day.index + 1}`,
-                  Time: act.startTime ? new Date(act.startTime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '',
+                  Time: formatActivityTimeRange(act) === '--:--' ? '' : formatActivityTimeRange(act),
+                  Duration: formatActivityDuration(act, language) || '',
                   Type: act.type,
                   Activity: act.title,
                   Description: act.description || '',
@@ -551,13 +434,32 @@ export default function TripDetailsClient({ id }: { id: string }) {
           });
       });
 
+      const footerRowIndex = data.length;
+      data.push({
+        Date: '',
+        Day: '',
+        Time: '',
+        Duration: '',
+        Type: '',
+        Activity: getExportAttributionLine(),
+        Description: EXPORT_WEBSITE,
+        Location: '',
+        'Maps Link': EXPORT_WEBSITE,
+        Cost: '',
+      });
+
       const ws = XLSX.utils.json_to_sheet(data);
+      const siteCell = `J${footerRowIndex + 1}`;
+      if (ws[siteCell]) {
+        ws[siteCell].l = { Target: EXPORT_WEBSITE, Tooltip: 'mankita.com' };
+      }
       
       // Set column widths
       ws['!cols'] = [
         { wch: 12 }, // Date
         { wch: 8 },  // Day
-        { wch: 8 },  // Time
+        { wch: 14 }, // Time
+        { wch: 10 }, // Duration
         { wch: 10 }, // Type
         { wch: 25 }, // Activity
         { wch: 30 }, // Description
@@ -601,8 +503,10 @@ export default function TripDetailsClient({ id }: { id: string }) {
       });
       
       sortedActivities.forEach((act, idx) => {
-        const timeStr = act.startTime ? new Date(act.startTime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '??:??';
-        content += `  ${idx + 1}. [${timeStr}] ${act.title} (${act.type})\n`;
+        const timeStr = formatActivityTimeRange(act);
+        const displayTime = timeStr === '--:--' ? '??:??' : timeStr;
+        const duration = formatActivityDuration(act, language);
+        content += `  ${idx + 1}. [${displayTime}${duration ? ` · ${duration}` : ''}] ${act.title} (${act.type})\n`;
         
         if (act.location) {
           content += `     Location: ${act.location}\n`;
@@ -622,7 +526,9 @@ export default function TripDetailsClient({ id }: { id: string }) {
     });
     
     content += `\n${'='.repeat(60)}\n`;
-    content += `Generated by Travel Planner - ${new Date().toLocaleDateString()}\n`;
+    content += `${getExportAttributionLine()}\n`;
+    content += `${EXPORT_WEBSITE}\n`;
+    content += `Generated on ${new Date().toLocaleDateString()}\n`;
     
     // Download as .txt file
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
@@ -640,6 +546,12 @@ export default function TripDetailsClient({ id }: { id: string }) {
     if (!trip) return;
     
     const exportData = {
+      _meta: {
+        app: EXPORT_APP_NAME,
+        website: EXPORT_WEBSITE,
+        credit: getExportFooterLine(),
+        exportedAt: new Date().toISOString(),
+      },
       title: trip.title,
       destination: trip.destination,
       startDate: trip.startDate,
@@ -655,6 +567,7 @@ export default function TripDetailsClient({ id }: { id: string }) {
           description: act.description,
           location: act.location,
           startTime: act.startTime,
+          endTime: act.endTime,
           cost: act.cost,
           currency: act.currency
         }))
@@ -699,11 +612,13 @@ export default function TripDetailsClient({ id }: { id: string }) {
       });
       
       sortedActivities.forEach((act, idx) => {
-        const timeStr = act.startTime ? new Date(act.startTime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
-        
+        const timeStr = formatActivityTimeRange(act);
+        const duration = formatActivityDuration(act, language);
+
         md += `### ${idx + 1}. ${act.title}\n\n`;
         md += `- **Type:** ${act.type}\n`;
-        if (timeStr) md += `- **Time:** ${timeStr}\n`;
+        if (timeStr !== '--:--') md += `- **Time:** ${timeStr}\n`;
+        if (duration) md += `- **Duration:** ${duration}\n`;
         if (act.location) {
           md += `- **Location:** [${act.location}](https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(act.location)})\n`;
         }
@@ -717,7 +632,9 @@ export default function TripDetailsClient({ id }: { id: string }) {
       md += `---\n\n`;
     });
     
-    md += `\n*Generated by Travel Planner - ${new Date().toLocaleDateString()}*\n`;
+    md += `\n---\n\n`;
+    md += `*${EXPORT_APP_NAME} — ${getExportFooterMarkdown()}*\n`;
+    md += `*Generated on ${new Date().toLocaleDateString()}*\n`;
     
     const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -779,7 +696,7 @@ export default function TripDetailsClient({ id }: { id: string }) {
     
     let icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//Travel Planner//EN
+PRODID:-//${EXPORT_APP_NAME}//EN
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 X-WR-CALNAME:${trip.title}
@@ -793,7 +710,9 @@ X-WR-CALNAME:${trip.title}
         
         if (act.startTime) {
           startTime = new Date(act.startTime);
-          endTime = new Date(startTime.getTime() + 60 * 60 * 1000); // Default 1 hour duration
+          endTime = act.endTime
+            ? new Date(act.endTime)
+            : new Date(startTime.getTime() + 60 * 60 * 1000);
         } else {
           // All-day event if no time specified
           startTime.setHours(9, 0, 0, 0);
@@ -1032,7 +951,7 @@ END:VEVENT
       {/* 1. Navigation */}
       <nav className={styles.navBar}>
          <Link href="/" className={styles.homeLink}>
-            ← {t('common.backToDashboard')}
+            <Logo variant="compact" wordmark={t('home.title')} linked={false} />
          </Link>
          <div className={styles.navActions}>
            <LanguageSwitcher />
@@ -1048,7 +967,7 @@ END:VEVENT
         <div className={styles.heroContent}>
             <h1 className={styles.title}>{trip.title}</h1>
             <div className={styles.destination}>
-                <span>{trip.destination}</span>
+                <span>{formatCountriesLabel(trip.countries, trip.destination)}</span>
             </div>
             
             <div className={styles.statsBar}>
@@ -1123,7 +1042,7 @@ END:VEVENT
                    <button onClick={() => { exportMarkdown(); setShowExportMenu(false); }} style={{width:'100%', padding:'0.75rem 1rem', textAlign:'left', background:'transparent', border:'none', cursor:'pointer', color:'hsl(var(--text))', borderTop:'1px solid hsl(var(--border))'}}>
                      📝 Markdown
                    </button>
-                   <button onClick={() => { exportPDF(); setShowExportMenu(false); }} style={{width:'100%', padding:'0.75rem 1rem', textAlign:'left', background:'transparent', border:'none', cursor:'pointer', color:'hsl(var(--text))', borderTop:'1px solid hsl(var(--border))'}}>
+                   <button onClick={() => { void exportPDF(); setShowExportMenu(false); }} style={{width:'100%', padding:'0.75rem 1rem', textAlign:'left', background:'transparent', border:'none', cursor:'pointer', color:'hsl(var(--text))', borderTop:'1px solid hsl(var(--border))'}}>
                      📄 PDF
                    </button>
                    <button onClick={() => { exportExcel(); setShowExportMenu(false); }} style={{width:'100%', padding:'0.75rem 1rem', textAlign:'left', background:'transparent', border:'none', cursor:'pointer', color:'hsl(var(--text))', borderTop:'1px solid hsl(var(--border))'}}>
@@ -1170,7 +1089,7 @@ END:VEVENT
             <DroppableDay dayId={day.id}>
             <div className={styles.activitiesList}>
               {day.activities.length === 0 ? (
-                 <div style={{color:'hsl(var(--text-dim))', fontStyle:'italic', padding:'0.5rem'}}>{t('activity.noActivities')}</div>
+                 <div className={styles.noActivities}>{t('activity.noActivities')}</div>
               ) : (
                 [...day.activities]
                   .sort((a, b) => {
@@ -1181,44 +1100,89 @@ END:VEVENT
                   })
                   .map(act => (
                   <DraggableActivity key={act.id} activityId={act.id}>
-                    <div className={styles.activityItem} onClick={() => openActivityDetail(act)} style={{cursor:'pointer'}}>
-                      <div className={styles.dragHandle} onClick={e => e.stopPropagation()}><GripVertical size={16} /></div>
-                      <div className={styles.time}>{act.startTime ? new Date(act.startTime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '--:--'}</div>
-                      <div className={styles.activityContent}>
-                        <h4>{act.title} <span style={{fontSize:'0.75rem', fontWeight:'normal', opacity:0.7}}>({act.type})</span></h4>
+                    <div className={styles.activityItem} onClick={() => openActivityDetail(act)}>
+                      <div className={styles.activityRail}>
+                        <div className={styles.dragHandle} onClick={e => e.stopPropagation()}>
+                          <GripVertical size={15} strokeWidth={1.75} />
+                        </div>
+                        <div className={styles.time}>
+                          {formatActivityTimeRange(act)}
+                        </div>
+                        {formatActivityDuration(act, language) && (
+                          <span className={styles.durationBadge}>
+                            {formatActivityDuration(act, language)}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className={styles.activityCard}>
+                        <div className={styles.activityCardTop}>
+                          <div className={styles.activityMain}>
+                            <h4 className={styles.activityTitle}>{act.title}</h4>
+                            <span className={styles.activityType}>{act.type}</span>
+                          </div>
+                          <div className={styles.activityAside} onClick={e => e.stopPropagation()}>
+                            {act.cost ? (
+                              <span className={styles.costBadge}>
+                                {act.cost} {act.currency || 'EUR'}
+                              </span>
+                            ) : null}
+                            <div className={styles.activityActions}>
+                              <button
+                                type="button"
+                                className={styles.activityActionBtn}
+                                aria-label={t('common.edit')}
+                                onClick={() => handleEditActivityClick(act, day.id)}
+                              >
+                                <Edit2 size={15} strokeWidth={1.75} />
+                              </button>
+                              <button
+                                type="button"
+                                className={`${styles.activityActionBtn} ${styles.activityActionBtnDanger}`}
+                                aria-label={t('common.delete')}
+                                onClick={() => handleDeleteActivity(act.id)}
+                              >
+                                <Trash2 size={15} strokeWidth={1.75} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
                         {act.location && (
-                          <p onClick={e => e.stopPropagation()}>
-                            📍 <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(act.location)}`} target="_blank" rel="noopener noreferrer" style={{color:'hsl(var(--primary))', textDecoration:'underline'}}>
+                          <p className={styles.activityLocation} onClick={e => e.stopPropagation()}>
+                            <MapPin size={13} strokeWidth={1.75} className={styles.activityLocationIcon} />
+                            <a
+                              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(act.location)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={styles.activityLocationLink}
+                            >
                               {act.location}
                             </a>
                           </p>
                         )}
-                        {act.description && <p style={{opacity:0.8, fontSize:'0.9rem'}}>{act.description.substring(0, 100)}{act.description.length > 100 ? '...' : ''}</p>}
+
+                        {act.description && (
+                          <p className={styles.activityDescription}>
+                            {act.description.substring(0, 100)}
+                            {act.description.length > 100 ? '…' : ''}
+                          </p>
+                        )}
+
                         {act.images && (() => {
                           const imgs = safeParseImageArray(act.images as unknown as string);
                           if (imgs.length === 0) return null;
                           return (
-                          <div style={{display:'flex', gap:'0.5rem', marginTop:'0.5rem', overflowX:'auto', paddingBottom:'0.25rem'}}>
+                            <div className={styles.activityThumbs}>
                               {imgs.slice(0, 3).map((img: string, idx: number) => (
-                                  <img key={idx} src={img} alt={`Activity ${idx+1}`} style={{width:'48px', height:'48px', objectFit:'cover', borderRadius:'0.375rem', border:'1px solid hsl(var(--border))', flexShrink:0}} />
+                                <img key={idx} src={img} alt="" className={styles.activityThumb} />
                               ))}
                               {imgs.length > 3 && (
-                                <div style={{width:'48px', height:'48px', display:'flex', alignItems:'center', justifyContent:'center', background:'hsl(var(--surface))', borderRadius:'0.375rem', fontSize:'0.8rem', color:'hsl(var(--text-dim))'}}>
-                                  +{imgs.length - 3}
-                                </div>
+                                <span className={styles.activityThumbMore}>+{imgs.length - 3}</span>
                               )}
-                          </div>
+                            </div>
                           );
                         })()}
-                      </div>
-                      <div className={styles.cost} onClick={e => e.stopPropagation()}>
-                          {act.cost ? `${act.cost} ${act.currency || ''}` : ''}
-                          <button onClick={() => { handleEditActivityClick(act, day.id); }} style={{marginLeft:'1rem', color:'#3b82f6', padding:'0.25rem'}}>
-                              <Edit2 size={16} />
-                          </button>
-                          <button onClick={() => handleDeleteActivity(act.id)} style={{marginLeft:'0.5rem', color:'#ef4444', padding:'0.25rem'}}>
-                              <Trash2 size={16} />
-                          </button>
                       </div>
                     </div>
                   </DraggableActivity>
@@ -1226,7 +1190,7 @@ END:VEVENT
               )}
               <button 
                 className={styles.addActivityBtn}
-                onClick={() => { setSelectedDayId(day.id); setForm(prev => ({...prev, dayId: day.id, time:''})); setShowAddModal(true); }}
+                onClick={() => { setSelectedDayId(day.id); setForm(prev => ({...prev, dayId: day.id, time:'', durationMinutes:''})); setShowAddModal(true); }}
               >
                 + {t('activity.addTitle')}
               </button>
@@ -1256,7 +1220,40 @@ END:VEVENT
               </div>
               <div className={styles.formField}>
                  <label>{t('activity.time')} ({t('common.optional')})</label>
-                 <input type="time" value={form.time} onChange={e => setForm({...form, time: e.target.value})} />
+                 <div className={styles.timeFields}>
+                   <input
+                     type="time"
+                     value={form.time}
+                     onChange={(e) =>
+                       setForm({
+                         ...form,
+                         time: e.target.value,
+                         durationMinutes: e.target.value ? form.durationMinutes : '',
+                       })
+                     }
+                   />
+                   <div>
+                     <label className={styles.durationLabel}>{t('activity.duration')}</label>
+                     <select
+                       value={form.durationMinutes}
+                       onChange={(e) => setForm({ ...form, durationMinutes: e.target.value })}
+                       disabled={!form.time}
+                     >
+                       <option value="">{t('activity.durationUnset')}</option>
+                       {form.durationMinutes &&
+                         !DURATION_OPTIONS.includes(Number(form.durationMinutes) as (typeof DURATION_OPTIONS)[number]) && (
+                           <option value={form.durationMinutes}>
+                             {formatDurationLabel(Number(form.durationMinutes), language)}
+                           </option>
+                         )}
+                       {DURATION_OPTIONS.map((minutes) => (
+                         <option key={minutes} value={String(minutes)}>
+                           {formatDurationLabel(minutes, language)}
+                         </option>
+                       ))}
+                     </select>
+                   </div>
+                 </div>
               </div>
               <div className={styles.formField}>
                 <label>{t('activity.type')}</label>
@@ -1290,6 +1287,7 @@ END:VEVENT
                   onChange={(value) => setForm({...form, location: value})}
                   placeholder={t('activity.locationPlaceholder')}
                   language={language}
+                  countryCodes={getCountryCodes(trip?.countries)}
                 />
               </div>
               <div className={styles.formField}>
@@ -1311,10 +1309,21 @@ END:VEVENT
               <div className={styles.formField}>
                 <label>{t('activity.images')}</label>
                 <div style={{display:'flex', gap:'0.5rem', alignItems:'center', marginBottom:'0.5rem'}}>
-                    <label style={{cursor:'pointer', padding:'0.5rem 1rem', background:'hsl(var(--surface))', border:'1px dashed hsl(var(--border))', borderRadius:'0.5rem', display:'flex', alignItems:'center', gap:'0.5rem', fontSize:'0.9rem'}}>
+                    <button
+                      type="button"
+                      onClick={() => activityImageInputRef.current?.click()}
+                      style={{cursor:'pointer', padding:'0.5rem 1rem', background:'hsl(var(--surface))', border:'1px dashed hsl(var(--border))', borderRadius:'0.5rem', display:'flex', alignItems:'center', gap:'0.5rem', fontSize:'0.9rem'}}
+                    >
                         <Upload size={16} /> {t('activity.uploadImages')}
-                        <input type="file" multiple accept="image/*" style={{display:'none'}} onChange={handleImageUpload} />
-                    </label>
+                    </button>
+                    <input
+                      ref={activityImageInputRef}
+                      type="file"
+                      multiple
+                      accept="image/*,.heic,.heif,.jpg,.jpeg,.png,.webp"
+                      style={{display:'none'}}
+                      onChange={handleImageUpload}
+                    />
                 </div>
                 {form.images && (
                     <div style={{display:'flex', gap:'0.5rem', marginTop:'0.5rem', overflowX:'auto', padding:'0.5rem', background:'hsl(var(--surface))', borderRadius:'0.5rem'}}>
@@ -1356,11 +1365,11 @@ END:VEVENT
                         <input required value={tripForm.title} onChange={e => setTripForm({...tripForm, title: e.target.value})} />
                     </div>
                     <div className={styles.formField}>
-                        <label>Destination</label>
-                        <LocationInput 
-                          value={tripForm.destination} 
-                          onChange={(value) => setTripForm({...tripForm, destination: value})}
-                          placeholder="Enter destination..."
+                        <label>{t('trip.countries')}</label>
+                        <CountryInput
+                          value={tripForm.countries}
+                          onChange={(countries) => setTripForm({ ...tripForm, countries })}
+                          placeholder={t('trip.countriesPlaceholder')}
                           language={language}
                         />
                     </div>
@@ -1381,10 +1390,20 @@ END:VEVENT
                     <div className={styles.formField}>
                         <label>Cover Image</label>
                         <div style={{display:'flex', gap:'0.5rem', alignItems:'center', marginBottom:'0.5rem'}}>
-                             <label style={{cursor:'pointer', padding:'0.5rem 1rem', background:'hsl(var(--surface))', border:'1px dashed hsl(var(--border))', borderRadius:'0.5rem', display:'flex', alignItems:'center', gap:'0.5rem'}}>
+                             <button
+                               type="button"
+                               onClick={() => tripCoverInputRef.current?.click()}
+                               style={{cursor:'pointer', padding:'0.5rem 1rem', background:'hsl(var(--surface))', border:'1px dashed hsl(var(--border))', borderRadius:'0.5rem', display:'flex', alignItems:'center', gap:'0.5rem'}}
+                             >
                                 <Upload size={16} /> Upload New Cover
-                                <input type="file" accept="image/*" style={{display:'none'}} onChange={handleTripImageUpload} />
-                             </label>
+                             </button>
+                             <input
+                               ref={tripCoverInputRef}
+                               type="file"
+                               accept="image/*,.heic,.heif,.jpg,.jpeg,.png,.webp"
+                               style={{display:'none'}}
+                               onChange={handleTripImageUpload}
+                             />
                              {tripForm.coverImage && (
                                  <button type="button" onClick={() => setTripForm({...tripForm, coverImage: ''})} style={{color:'#e53e3e', fontSize:'0.8rem'}}>Remove</button>
                              )}
@@ -1417,7 +1436,12 @@ END:VEVENT
               <span style={{padding:'0.25rem 0.75rem', background:'hsl(var(--primary))', color:'white', borderRadius:'999px', fontSize:'0.8rem'}}>{viewActivity.type}</span>
               {viewActivity.startTime && (
                 <span style={{padding:'0.25rem 0.75rem', background:'hsl(var(--surface))', borderRadius:'999px', fontSize:'0.8rem'}}>
-                  ⏰ {new Date(viewActivity.startTime).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}
+                  {formatActivityTimeRange(viewActivity)}
+                </span>
+              )}
+              {formatActivityDuration(viewActivity, language) && (
+                <span style={{padding:'0.25rem 0.75rem', background:'hsl(var(--surface))', borderRadius:'999px', fontSize:'0.8rem'}}>
+                  {formatActivityDuration(viewActivity, language)}
                 </span>
               )}
               {viewActivity.cost && (

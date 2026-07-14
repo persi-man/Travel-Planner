@@ -1,0 +1,37 @@
+.footer {
+  margin-top: auto;
+  padding: 2rem 1.25rem 2.5rem;
+  border-top: 1px solid hsl(var(--rule));
+  text-align: center;
+}
+
+.text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.78rem;
+  color: hsl(var(--ink-faint));
+  letter-spacing: 0.02em;
+}
+
+.copy {
+  font-weight: 500;
+}
+
+.bar {
+  display: inline-block;
+  width: 1px;
+  height: 0.85rem;
+  background: hsl(var(--rule));
+}
+
+.link {
+  color: hsl(var(--ink-muted));
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s var(--ease-out);
+}
+
+.link:hover {
+  color: hsl(var(--stamp));
+}

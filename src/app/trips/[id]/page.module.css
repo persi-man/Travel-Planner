@@ -7,7 +7,7 @@
   padding: 1rem 1.25rem;
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: 1rem;
   border-bottom: 2px solid hsl(var(--ink));
   position: absolute;
@@ -19,11 +19,8 @@
 }
 
 .homeLink {
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: hsl(var(--ink-muted));
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  text-decoration: none;
+  color: inherit;
 }
 
 .hero {
@@ -129,56 +126,282 @@
 
 .dayCard {
   border-top: 1px solid hsl(var(--rule));
-  padding: 1.25rem 0;
+  padding: 1.35rem 0 0.5rem;
 }
 
 .dayCard + .dayCard {
-  border-top: 1px solid hsl(var(--rule));
+  margin-top: 0.5rem;
 }
 
 .dayHeader {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   margin-bottom: 0.85rem;
 }
 
 .dayDate {
   font-family: var(--font-display), Georgia, serif;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.activitiesList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.noActivities {
+  color: hsl(var(--ink-faint));
+  font-style: italic;
+  padding: 0.5rem 0;
+  font-size: 0.9rem;
 }
 
 .activityItem {
-  display: grid;
-  grid-template-columns: 4rem 1fr auto;
-  gap: 0.75rem 1rem;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid hsl(var(--rule));
-  align-items: start;
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
+  cursor: pointer;
+}
+
+.activityItem:active {
+  cursor: grabbing;
+}
+
+.activityRail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  width: 3.25rem;
+  flex-shrink: 0;
+  padding-top: 0.85rem;
+}
+
+.dragHandle {
+  color: hsl(var(--ink-faint));
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.15rem;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
 }
 
 .time {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: hsl(var(--ink-faint));
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
-.cost {
+.durationBadge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: hsl(var(--stamp));
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.timeFields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.durationLabel {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: hsl(var(--ink-muted));
+}
+
+.timeFields select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.activityCard {
+  flex: 1;
+  min-width: 0;
+  background: hsl(var(--paper-raised));
+  border: 1px solid hsl(var(--rule));
+  padding: 0.85rem 1rem;
+  transition: border-color 0.15s var(--ease-out);
+}
+
+.activityItem:hover .activityCard {
+  border-color: hsl(var(--ink-faint));
+}
+
+.activityCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem 1rem;
+}
+
+.activityMain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.5rem;
+  min-width: 0;
+}
+
+.activityTitle {
+  font-family: var(--font-display), Georgia, serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  line-height: 1.25;
+  margin: 0;
+  color: hsl(var(--ink));
+}
+
+.activityType {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: hsl(var(--ink-faint));
+  padding: 0.15rem 0.4rem;
+  border: 1px solid hsl(var(--rule));
+  line-height: 1.3;
+}
+
+.activityAside {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.costBadge {
+  font-size: 0.82rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: hsl(var(--stamp));
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.activityActions {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.activityActionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: hsl(var(--ink-faint));
+  padding: 0.3rem;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s, background 0.15s;
+}
+
+.activityActionBtn:hover {
+  color: hsl(var(--stamp));
+  background: hsl(var(--rule) / 0.45);
+}
+
+.activityActionBtnDanger:hover {
+  color: hsl(var(--stamp));
+}
+
+.activityLocation {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  margin-top: 0.45rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.activityLocationIcon {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  color: hsl(var(--ink-faint));
+}
+
+.activityLocationLink {
+  color: hsl(var(--ink-muted));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-word;
+}
+
+.activityLocationLink:hover {
+  color: hsl(var(--stamp));
+}
+
+.activityDescription {
+  margin-top: 0.35rem;
+  font-size: 0.875rem;
+  color: hsl(var(--ink-muted));
+  line-height: 1.45;
+}
+
+.activityThumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+  overflow-x: auto;
+  padding-bottom: 0.1rem;
+}
+
+.activityThumb {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  border: 1px solid hsl(var(--rule));
+  flex-shrink: 0;
+  display: block;
+}
+
+.activityThumbMore {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: hsl(var(--paper));
+  border: 1px solid hsl(var(--rule));
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: hsl(var(--ink-faint));
 }
 
 .addActivityBtn {
-  margin-top: 0.5rem;
+  margin-top: 0.35rem;
   font-weight: 600;
   color: hsl(var(--stamp));
   text-decoration: underline;
   text-underline-offset: 3px;
   background: none;
   padding: 0.5rem 0;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
 }
 
 .formOverlay {
@@ -243,34 +466,6 @@
   font-size: 0.9rem;
 }
 
-.activitiesList {
-  padding: 0;
-}
-
-.activityItem {
-  cursor: grab;
-}
-
-.activityItem:active {
-  cursor: grabbing;
-}
-
-.dragHandle {
-  color: hsl(var(--ink-faint));
-  cursor: grab;
-}
-
-.activityContent h4 {
-  font-weight: 600;
-  margin-bottom: 0.15rem;
-  font-size: 1rem;
-}
-
-.activityContent p {
-  font-size: 0.9rem;
-  color: hsl(var(--ink-muted));
-}
-
 .formField {
   margin-bottom: 0.875rem;
   position: relative;
@@ -318,8 +513,22 @@
 }
 
 @media (max-width: 640px) {
-  .activityItem {
-    grid-template-columns: 3.5rem 1fr auto;
+  .activityRail {
+    width: 2.75rem;
+  }
+
+  .activityCard {
+    padding: 0.75rem 0.85rem;
+  }
+
+  .activityCardTop {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .activityAside {
+    width: 100%;
+    justify-content: space-between;
   }
 }
 

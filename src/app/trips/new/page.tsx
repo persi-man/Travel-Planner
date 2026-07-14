@@ -4,22 +4,25 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Upload } from 'lucide-react';
-import LocationInput from '@/components/LocationInput';
+import CountryInput from '@/components/CountryInput';
 import AppHeader from '@/components/AppHeader';
+import Logo from '@/components/Logo';
 import { useLanguage } from '@/i18n/LanguageContext';
-import { createTrip } from '@/lib/db';
+import { createTrip, type TripCountry } from '@/lib/db';
+import { readImageFile } from '@/lib/imageUtils';
 import styles from './page.module.css';
 
 export default function NewTripPage() {
   const router = useRouter();
   const endDateRef = useRef<HTMLInputElement>(null);
+  const coverImageInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { t, language } = useLanguage();
 
   const [form, setForm] = useState({
     title: '',
-    destination: '',
+    countries: [] as TripCountry[],
     startDate: '',
     endDate: '',
     budget: '',
@@ -27,16 +30,19 @@ export default function NewTripPage() {
     coverImage: ''
   });
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
-      const reader = new FileReader();
-      reader.onloadend = () => {
-          if (reader.result) {
-              setForm(prev => ({ ...prev, coverImage: reader.result as string }));
-          }
-      };
-      reader.readAsDataURL(file);
+
+      try {
+        const dataUrl = await readImageFile(file);
+        setForm((prev) => ({ ...prev, coverImage: dataUrl }));
+      } catch (error) {
+        console.error('Cover image upload failed:', file.name, file.type, file.size, error);
+        setError(t('trip.coverImageError'));
+      } finally {
+        e.target.value = '';
+      }
   };
 
   const handleStartDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,6 +63,12 @@ export default function NewTripPage() {
     setError('');
 
     try {
+      if (form.countries.length === 0) {
+        setError(t('trip.countriesRequired'));
+        setLoading(false);
+        return;
+      }
+
       await createTrip(form);
       router.push('/');
       router.refresh();
@@ -72,7 +84,7 @@ export default function NewTripPage() {
     <main className={styles.main}>
       <div className={styles.container}>
         <div className={styles.topRow}>
-          <Link href="/" className={styles.backLink}>← {t('common.back')}</Link>
+          <Logo variant="compact" wordmark={t('home.title')} />
           <AppHeader />
         </div>
         <h1 className={styles.title}>{t('trip.createTitle')}</h1>
@@ -92,14 +104,14 @@ export default function NewTripPage() {
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label}>{t('trip.destination')}</label>
-            <LocationInput
-              value={form.destination}
-              onChange={(value) => setForm({ ...form, destination: value })}
-              placeholder={t('trip.destinationPlaceholder')}
-              required
-              className={styles.input}
+            <label className={styles.label}>{t('trip.countries')}</label>
+            <p className={styles.hint}>{t('trip.countriesHint')}</p>
+            <CountryInput
+              value={form.countries}
+              onChange={(countries) => setForm({ ...form, countries })}
+              placeholder={t('trip.countriesPlaceholder')}
               language={language}
+              className={styles.input}
             />
           </div>
 
@@ -163,11 +175,22 @@ export default function NewTripPage() {
           <div className={styles.formGroup}>
             <label className={styles.label}>{t('trip.coverImage')} ({t('common.optional')})</label>
              <div className={styles.uploadRow}>
-                 <label className={styles.uploadLabel}>
+                 <button
+                   type="button"
+                   className={styles.uploadLabel}
+                   onClick={() => coverImageInputRef.current?.click()}
+                 >
                     <Upload size={20} />
                     <span>{t('trip.uploadFromDevice')}</span>
-                    <input type="file" accept="image/*" className="hidden" style={{display:'none'}} onChange={handleImageUpload} />
-                 </label>
+                 </button>
+                 <input
+                   ref={coverImageInputRef}
+                   type="file"
+                   accept="image/*,.heic,.heif,.jpg,.jpeg,.png,.webp"
+                   className="hidden"
+                   style={{display:'none'}}
+                   onChange={handleImageUpload}
+                 />
             </div>
             {form.coverImage && (
                 <div className={styles.previewContainer}>

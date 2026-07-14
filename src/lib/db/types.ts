@@ -1,3 +1,8 @@
+export interface TripCountry {
+  code: string;
+  name: string;
+}
+
 export interface Activity {
   id: string;
   dayId: string;
@@ -27,6 +32,7 @@ export interface Trip {
   id: string;
   title: string;
   destination: string;
+  countries?: TripCountry[];
   startDate: string;
   endDate: string;
   budget?: number | null;
@@ -41,6 +47,7 @@ export interface TripListItem {
   id: string;
   title: string;
   destination: string;
+  countries?: TripCountry[];
   startDate: string;
   endDate: string;
   coverImage?: string | null;
@@ -49,7 +56,8 @@ export interface TripListItem {
 
 export interface CreateTripInput {
   title: string;
-  destination: string;
+  destination?: string;
+  countries?: TripCountry[];
   startDate: string;
   endDate: string;
   budget?: string | number | null;
@@ -60,6 +68,7 @@ export interface CreateTripInput {
 export interface UpdateTripInput {
   title?: string;
   destination?: string;
+  countries?: TripCountry[];
   startDate?: string;
   endDate?: string;
   budget?: string | number | null;
@@ -88,6 +97,7 @@ export interface UpdateActivityInput {
   description?: string;
   location?: string;
   startTime?: string | null;
+  endTime?: string | null;
   cost?: number | string | null;
   currency?: string | null;
   images?: string[] | string;
