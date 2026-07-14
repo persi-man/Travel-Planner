@@ -1,0 +1,48 @@
+---
+description: Commits Git humains, sans trailers IA ni style machine
+alwaysApply: true
+---
+
+# Commits Git
+
+## Interdictions
+
+- Ne jamais ajouter `Co-authored-by:`, `Signed-off-by:` ou tout trailer mentionnant Cursor, un agent IA ou `cursoragent@cursor.com`.
+- Ne jamais utiliser `git commit --trailer`.
+- Ne pas créer de commit sauf demande explicite de l'utilisateur.
+
+## Style de message
+
+Écrire comme un développeur humain, pas comme un changelog généré.
+
+**À éviter**
+- Titres longs et descriptifs à la OpenAPI (`Migrate to GitHub Pages with IndexedDB client storage.`)
+- Corps de commit qui répète chaque fichier modifié
+- Listes à puces exhaustives pour un petit changement
+- Ton marketing ou « release notes »
+
+**À privilégier**
+- Une ligne courte, directe, au présent ou passé simple
+- Le « pourquoi » seulement si ce n'est pas évident
+- Français ou anglais selon le fil de la conversation ; rester cohérent dans le dépôt
+
+**Exemples**
+
+```
+Node 22 en CI
+```
+
+```
+UI plus lisible, moins template
+```
+
+```
+Corrige le déploiement Pages sur repo public
+```
+
+Pas de point final inutile. Pas de majuscule sur chaque mot du titre.
+
+## Avant chaque commit
+
+1. Vérifier que le message ne contient aucun trailer IA.
+2. Si un hook `commit-msg` est présent, il filtrera les lignes restantes — ne pas s'y fier pour en ajouter volontairement.

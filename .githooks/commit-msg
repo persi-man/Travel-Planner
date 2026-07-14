@@ -1,0 +1,4 @@
+#!/bin/sh
+# Strip AI co-author trailers before the commit is recorded.
+ROOT="$(CDPATH= cd -- "$(dirname "$0")/../.." && pwd)"
+python "$ROOT/.githooks/strip-commit-trailers.py" "$1"
