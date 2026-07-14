@@ -1,5 +1,6 @@
 'use client';
 
+import { HardDrive } from 'lucide-react';
 import { useLanguage } from '@/i18n/LanguageContext';
 import styles from './LocalDataBanner.module.css';
 
@@ -8,7 +9,7 @@ export default function LocalDataBanner() {
 
   return (
     <div className={styles.banner} role="status">
-      <span className={styles.icon}>💾</span>
+      <HardDrive size={15} strokeWidth={1.75} className={styles.icon} />
       <p>{t('home.localDataNotice')}</p>
     </div>
   );

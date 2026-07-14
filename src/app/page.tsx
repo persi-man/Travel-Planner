@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import { Upload } from 'lucide-react';
+import { Upload, MapPin, CalendarDays } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useLanguage } from '@/i18n/LanguageContext';
 import LocalDataBanner from '@/components/LocalDataBanner';
@@ -387,11 +387,11 @@ export default function Home() {
       <div className={styles.container}>
         <header className={styles.header}>
           <div>
-            <h1 className={`${styles.title} gradient-text`}>{t('home.title')}</h1>
+            <h1 className={`${styles.title} display-title`}>{t('home.title')}</h1>
             <p className={styles.subtitle}>{t('home.subtitle')}</p>
           </div>
-          <div style={{display:'flex', gap:'0.75rem'}}>
-            <label className={styles.importButton} style={{cursor:'pointer'}}>
+          <div className={styles.headerActions}>
+            <label className={styles.importButton} style={{ cursor: 'pointer' }}>
               <Upload size={18} /> {t('home.importTrip')}
               <input 
                 type="file" 
@@ -410,7 +410,7 @@ export default function Home() {
         <LocalDataBanner />
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '4rem', color: 'hsl(var(--text-dim))' }}>
+          <div className={styles.loadingState}>
             {t('common.loading')}
           </div>
         ) : trips.length === 0 ? (
@@ -437,8 +437,14 @@ export default function Home() {
                 <div className={styles.cardContent}>
                   <h3 className={styles.cardTitle}>{trip.title}</h3>
                   <div className={styles.cardMeta}>
-                    <span style={{ marginRight: '1rem' }}>📍 {trip.destination}</span>
-                    <span>📅 {Math.ceil((new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24))} {t('home.tripCard.days')}</span>
+                    <span className={styles.metaItem}>
+                      <MapPin size={13} strokeWidth={1.75} />
+                      {trip.destination}
+                    </span>
+                    <span className={styles.metaItem}>
+                      <CalendarDays size={13} strokeWidth={1.75} />
+                      {Math.ceil((new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24))} {t('home.tripCard.days')}
+                    </span>
                   </div>
                 </div>
               </Link>

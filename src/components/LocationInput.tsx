@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { MapPin } from 'lucide-react';
 import styles from './LocationInput.module.css';
 
 interface LocationSuggestion {
@@ -134,7 +135,7 @@ export default function LocationInput({
               onClick={() => handleSuggestionClick(suggestion)}
               className={styles.suggestionItem}
             >
-              <span className={styles.suggestionIcon}>📍</span>
+              <MapPin size={13} strokeWidth={1.75} className={styles.suggestionIcon} />
               <span className={styles.suggestionText}>{suggestion.display_name}</span>
             </li>
           ))}

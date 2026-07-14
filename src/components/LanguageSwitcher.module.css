@@ -5,40 +5,43 @@
 .trigger {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0.5rem 0.75rem;
+  gap: 0.35rem;
+  padding: 0.4rem 0.6rem;
   background: hsl(var(--surface));
   border: 1px solid hsl(var(--border));
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: hsl(var(--text-main));
+  transition: border-color 0.16s var(--ease-out);
 }
 
-.trigger:hover {
-  background: hsl(var(--primary) / 0.1);
-  border-color: hsl(var(--primary) / 0.3);
+@media (hover: hover) and (pointer: fine) {
+  .trigger:hover {
+    border-color: hsl(var(--primary));
+  }
 }
 
-.flag {
-  font-size: 1.2rem;
+.code {
+  letter-spacing: 0.04em;
 }
 
-.arrow {
-  font-size: 0.6rem;
+.chevron {
+  font-size: 0.55rem;
   color: hsl(var(--text-dim));
 }
 
 .dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 4px);
   right: 0;
-  margin-top: 0.25rem;
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
-  border-radius: var(--radius-md);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
   z-index: 100;
-  min-width: 140px;
+  min-width: 120px;
   overflow: hidden;
 }
 
@@ -47,31 +50,31 @@
   align-items: center;
   gap: 0.5rem;
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.55rem 0.75rem;
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.12s var(--ease-out);
   color: hsl(var(--text-main));
   text-align: left;
+  font-size: 0.85rem;
 }
 
 .option:not(:first-child) {
   border-top: 1px solid hsl(var(--border));
 }
 
-.option:hover {
-  background: hsl(var(--primary) / 0.1);
+@media (hover: hover) and (pointer: fine) {
+  .option:hover {
+    background: hsl(var(--primary) / 0.06);
+  }
 }
 
 .option.active {
-  background: hsl(var(--primary) / 0.15);
-}
-
-.optionFlag {
-  font-size: 1.1rem;
+  background: hsl(var(--primary) / 0.1);
+  font-weight: 600;
 }
 
 .optionName {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }

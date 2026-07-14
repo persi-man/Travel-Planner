@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
+import styles from './ThemeToggle.module.css';
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState('system');
+  const [theme, setTheme] = useState('light');
 
   useEffect(() => {
     const saved = localStorage.getItem('theme');
-    if (saved) {
-      setTheme(saved);
-      document.documentElement.setAttribute('data-theme', saved);
-    }
+    const initial = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    setTheme(initial);
+    document.documentElement.setAttribute('data-theme', initial);
   }, []);
 
   const toggleTheme = () => {
@@ -22,12 +22,13 @@ export default function ThemeToggle() {
   };
 
   return (
-    <button 
+    <button
       onClick={toggleTheme}
-      className="p-2 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--surface))] text-[hsl(var(--text-main))] shadow-sm hover:shadow-md transition-all"
-      aria-label="Toggle Theme"
+      className={styles.button}
+      aria-label="Toggle theme"
+      type="button"
     >
-      {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+      {theme === 'dark' ? <Sun size={16} strokeWidth={1.75} /> : <Moon size={16} strokeWidth={1.75} />}
     </button>
   );
 }

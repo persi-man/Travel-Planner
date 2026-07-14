@@ -70,9 +70,9 @@ export default function NewTripPage() {
   return (
     <main className={styles.main}>
       <div className={styles.container}>
-        <h1 className={`${styles.title} gradient-text`}>{t('trip.createTitle')}</h1>
-        
-        <form onSubmit={handleSubmit} className={`${styles.formCard} glass-panel`}>
+        <h1 className={`${styles.title} display-title`}>{t('trip.createTitle')}</h1>
+
+        <form onSubmit={handleSubmit} className={styles.formCard}>
           <div className={styles.field}>
             <label className={styles.label}>{t('trip.title')}</label>
             <input 
@@ -156,7 +156,7 @@ export default function NewTripPage() {
 
           <div className={styles.formGroup}>
             <label className={styles.label}>{t('trip.coverImage')} ({t('common.optional')})</label>
-             <div className="flex gap-2 items-center mb-2">
+             <div className={styles.uploadRow}>
                  <label className={styles.uploadLabel}>
                     <Upload size={20} />
                     <span>{t('trip.uploadFromDevice')}</span>

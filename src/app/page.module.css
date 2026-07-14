@@ -1,46 +1,55 @@
 .main {
   min-height: 100vh;
-  padding: 2rem;
-  background: hsl(var(--background));
+  padding: 2.5rem 2rem 4rem;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1120px;
   margin: 0 auto;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 3rem;
+  align-items: flex-end;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid hsl(var(--border));
 }
 
 .title {
-  font-size: 2.5rem;
-  font-weight: 800;
-  margin-bottom: 0.5rem;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  margin-bottom: 0.35rem;
 }
 
 .subtitle {
   color: hsl(var(--text-dim));
-  font-size: 1.1rem;
+  font-size: 1rem;
+  max-width: 36ch;
+}
+
+.headerActions {
+  display: flex;
+  gap: 0.625rem;
+  flex-shrink: 0;
 }
 
 .newButton {
   background-color: hsl(var(--primary));
-  color: hsl(var(--surface));
-  padding: 0.75rem 1.5rem;
-  border-radius: var(--radius-full);
+  color: hsl(40 38% 98%);
+  padding: 0.625rem 1.125rem;
+  border-radius: var(--radius-sm);
   font-weight: 600;
-  box-shadow: var(--shadow-lg);
-  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  border: 1px solid hsl(var(--primary-dark));
+  transition: background-color 0.16s var(--ease-out), transform 0.16s var(--ease-out);
 }
 
-.newButton:hover {
-  background-color: hsl(var(--primary-dark));
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-xl);
+@media (hover: hover) and (pointer: fine) {
+  .newButton:hover {
+    background-color: hsl(var(--primary-dark));
+  }
 }
 
 .importButton {
@@ -49,25 +58,25 @@
   gap: 0.5rem;
   background-color: hsl(var(--surface));
   color: hsl(var(--text-main));
-  padding: 0.75rem 1.5rem;
-  border-radius: var(--radius-full);
+  padding: 0.625rem 1.125rem;
+  border-radius: var(--radius-sm);
   font-weight: 600;
-  box-shadow: var(--shadow-md);
-  transition: all 0.2s ease;
+  font-size: 0.9rem;
   border: 1px solid hsl(var(--border));
+  transition: border-color 0.16s var(--ease-out), color 0.16s var(--ease-out);
 }
 
-.importButton:hover {
-  background-color: hsl(var(--background));
-  transform: translateY(-2px);
-  border-color: hsl(var(--primary));
-  color: hsl(var(--primary));
+@media (hover: hover) and (pointer: fine) {
+  .importButton:hover {
+    border-color: hsl(var(--primary));
+    color: hsl(var(--primary));
+  }
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
 }
 
 .card {
@@ -76,20 +85,45 @@
   background: hsl(var(--surface));
   border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
-  transition: transform 0.2s, box-shadow 0.2s;
   border: 1px solid hsl(var(--border));
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
   height: 100%;
+  animation: cardIn 0.4s var(--ease-out) both;
 }
 
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-xl);
+.card:nth-child(1) { animation-delay: 0ms; }
+.card:nth-child(2) { animation-delay: 50ms; }
+.card:nth-child(3) { animation-delay: 100ms; }
+.card:nth-child(4) { animation-delay: 150ms; }
+.card:nth-child(5) { animation-delay: 200ms; }
+.card:nth-child(6) { animation-delay: 250ms; }
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    border-color: hsl(var(--primary) / 0.4);
+    box-shadow: var(--shadow-md);
+  }
+
+  .card:hover .cardImage img {
+    transform: scale(1.03);
+  }
 }
 
 .cardImage {
-  height: 200px;
-  background: #ddd;
+  height: 168px;
+  background: hsl(var(--border) / 0.4);
   position: relative;
   overflow: hidden;
 }
@@ -98,65 +132,107 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s;
-}
-
-.card:hover .cardImage img {
-  transform: scale(1.05);
+  transition: transform 0.35s var(--ease-out);
 }
 
 .cardImagePlaceholder {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
-  opacity: 0.8;
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      hsl(var(--border) / 0.5),
+      hsl(var(--border) / 0.5) 2px,
+      transparent 2px,
+      transparent 10px
+    ),
+    hsl(var(--secondary) / 0.12);
 }
 
 .dateBadge {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(4px);
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-full);
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: hsl(var(--text-main));
-  box-shadow: var(--shadow-sm);
+  top: 0.75rem;
+  left: 0.75rem;
+  background: hsl(var(--surface) / 0.92);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--text-dim));
+  border: 1px solid hsl(var(--border));
+  letter-spacing: 0.02em;
 }
 
 .cardContent {
-  padding: 1.5rem;
+  padding: 1.125rem 1.25rem 1.25rem;
 }
 
 .cardTitle {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 0.625rem;
   color: hsl(var(--text-main));
+  line-height: 1.25;
 }
 
 .cardMeta {
   display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
   color: hsl(var(--text-dim));
-  font-size: 0.9rem;
+  font-size: 0.82rem;
+}
+
+.metaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.metaItem svg {
+  flex-shrink: 0;
+  opacity: 0.7;
 }
 
 .emptyState {
   text-align: center;
-  padding: 5rem 2rem;
+  padding: 4rem 2rem;
   background: hsl(var(--surface));
   border-radius: var(--radius-lg);
   border: 1px dashed hsl(var(--border));
 }
 
 .emptyTitle {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
 }
 
 .emptyLink {
   color: hsl(var(--primary));
   font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.loadingState {
+  text-align: center;
+  padding: 4rem;
+  color: hsl(var(--text-dim));
+  font-size: 0.95rem;
+}
+
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .headerActions {
+    flex-direction: column;
+  }
 }

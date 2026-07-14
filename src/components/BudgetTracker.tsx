@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Wallet, Loader2 } from 'lucide-react';
 import { calculateTotalInCurrency } from '@/lib/currency';
+import { useLanguage } from '@/i18n/LanguageContext';
 import styles from './BudgetTracker.module.css';
 
 interface Activity {
@@ -18,10 +20,11 @@ interface BudgetTrackerProps {
 export default function BudgetTracker({ budget, currency, activities }: BudgetTrackerProps) {
   const [totalSpent, setTotalSpent] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
 
   useEffect(() => {
     let isMounted = true;
-    
+
     async function calculateTotal() {
       setLoading(true);
       const total = await calculateTotalInCurrency(activities, currency);
@@ -30,14 +33,14 @@ export default function BudgetTracker({ budget, currency, activities }: BudgetTr
         setLoading(false);
       }
     }
-    
+
     calculateTotal();
-    
+
     return () => { isMounted = false; };
   }, [activities, currency]);
 
   if (!budget || budget <= 0) {
-    return null; // Don't show if no budget set
+    return null;
   }
 
   const remaining = budget - totalSpent;
@@ -50,51 +53,54 @@ export default function BudgetTracker({ budget, currency, activities }: BudgetTr
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 0,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }).format(amount);
   };
 
   return (
     <div className={styles.tracker}>
       <div className={styles.header}>
-        <span className={styles.label}>💰 Budget</span>
-        {loading && <span className={styles.loading}>⟳</span>}
+        <span className={styles.label}>
+          <Wallet size={15} strokeWidth={1.75} />
+          {t('budget.title')}
+        </span>
+        {loading && <Loader2 size={14} className={styles.loading} strokeWidth={2} />}
       </div>
-      
+
       <div className={styles.progressContainer}>
-        <div 
+        <div
           className={`${styles.progressBar} ${isOverBudget ? styles.over : isWarning ? styles.warning : ''}`}
           style={{ width: `${Math.min(percentageUsed, 100)}%` }}
         />
       </div>
-      
+
       <div className={styles.details}>
         <div className={styles.spent}>
-          <span className={styles.detailLabel}>Spent:</span>
+          <span className={styles.detailLabel}>{t('budget.spent')}</span>
           <span className={`${styles.amount} ${isOverBudget ? styles.overAmount : ''}`}>
             {formatCurrency(totalSpent)}
           </span>
         </div>
         <div className={styles.remaining}>
-          <span className={styles.detailLabel}>Remaining:</span>
+          <span className={styles.detailLabel}>{t('budget.remaining')}</span>
           <span className={`${styles.amount} ${isOverBudget ? styles.overAmount : isWarning ? styles.warningAmount : styles.okAmount}`}>
             {formatCurrency(remaining)}
           </span>
         </div>
         <div className={styles.total}>
-          <span className={styles.detailLabel}>Budget:</span>
+          <span className={styles.detailLabel}>{t('budget.title')}</span>
           <span className={styles.amount}>{formatCurrency(budget)}</span>
         </div>
       </div>
-      
+
       {isOverBudget && (
         <div className={styles.alert}>
-          ⚠️ Over budget by {formatCurrency(Math.abs(remaining))}
+          {t('budget.overBudget')} {formatCurrency(Math.abs(remaining))}
         </div>
       )}
       {isWarning && (
         <div className={styles.warningAlert}>
-          ⚡ {Math.round(percentageUsed)}% of budget used
+          {Math.round(percentageUsed)}% {t('budget.used')}
         </div>
       )}
     </div>

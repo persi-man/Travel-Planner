@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
-import { Trash2, Edit2, Upload, X, GripVertical } from 'lucide-react';
+import { Trash2, Edit2, Upload, X, GripVertical, MapPin } from 'lucide-react';
 import { DndContext, DragEndEvent, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import LocationInput from '@/components/LocationInput';
@@ -1022,8 +1022,8 @@ END:VEVENT
     e.target.value = ''; // Reset input
   };
 
-  if (loading) return <div className={styles.main} style={{padding:'2rem'}}>{t('common.loading')}</div>;
-  if (!trip) return <div className={styles.main}>Trip not found</div>;
+  if (loading) return <div className={`${styles.main} ${styles.loadingState}`}>{t('common.loading')}</div>;
+  if (!trip) return <div className={`${styles.main} ${styles.loadingState}`}>Trip not found</div>;
 
   return (
     <main className={styles.main}>
@@ -1043,7 +1043,8 @@ END:VEVENT
         <div className={styles.heroContent}>
             <h1 className={styles.title}>{trip.title}</h1>
             <div className={styles.destination}>
-                <span>📍 {trip.destination}</span>
+                <MapPin size={14} strokeWidth={1.75} />
+                <span>{trip.destination}</span>
             </div>
             
             <div className={styles.statsBar}>
@@ -1084,7 +1085,7 @@ END:VEVENT
              <button onClick={openEditTrip} className={styles.actionButton}>
                 <Edit2 size={16} /> {t('common.edit')}
              </button>
-             <button onClick={handleDeleteTrip} className={styles.actionButton} style={{color: '#e53e3e', borderColor:'#e53e3e'}}>
+             <button onClick={handleDeleteTrip} className={`${styles.actionButton} ${styles.dangerBtn}`}>
                 <Trash2 size={16} /> {t('common.delete')}
              </button>
              <div style={{width:'1px', background:'hsl(var(--border))', margin:'0 0.5rem'}}></div>

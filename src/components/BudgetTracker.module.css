@@ -1,9 +1,12 @@
 .tracker {
-  background: hsl(var(--card));
+  background: hsl(var(--surface));
   border: 1px solid hsl(var(--border));
-  border-radius: var(--radius-md);
-  padding: 1rem;
-  margin-bottom: 1.5rem;
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.125rem;
+  margin: 0 1rem 1.5rem;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .header {
@@ -14,14 +17,19 @@
 }
 
 .label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: hsl(var(--text-main));
+  font-family: var(--font-display), Georgia, serif;
 }
 
 .loading {
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
   opacity: 0.5;
+  color: hsl(var(--text-dim));
 }
 
 @keyframes spin {
@@ -29,26 +37,26 @@
 }
 
 .progressContainer {
-  height: 8px;
-  background: hsl(var(--border));
-  border-radius: 4px;
+  height: 6px;
+  background: hsl(var(--border) / 0.6);
+  border-radius: 2px;
   overflow: hidden;
   margin-bottom: 0.75rem;
 }
 
 .progressBar {
   height: 100%;
-  background: linear-gradient(90deg, hsl(142, 76%, 36%), hsl(142, 71%, 45%));
-  border-radius: 4px;
-  transition: width 0.5s ease, background 0.3s;
+  background: hsl(var(--secondary));
+  border-radius: 2px;
+  transition: width 0.4s var(--ease-out), background 0.2s var(--ease-out);
 }
 
 .progressBar.warning {
-  background: linear-gradient(90deg, hsl(38, 92%, 50%), hsl(45, 93%, 47%));
+  background: hsl(var(--accent));
 }
 
 .progressBar.over {
-  background: linear-gradient(90deg, hsl(0, 72%, 51%), hsl(0, 84%, 60%));
+  background: hsl(4 62% 48%);
 }
 
 .details {
@@ -57,56 +65,59 @@
   flex-wrap: wrap;
 }
 
-.spent, .remaining, .total {
+.spent,
+.remaining,
+.total {
   display: flex;
   flex-direction: column;
   gap: 0.125rem;
 }
 
 .detailLabel {
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   color: hsl(var(--text-dim));
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 
 .amount {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
   color: hsl(var(--text-main));
 }
 
 .okAmount {
-  color: hsl(142, 76%, 36%);
+  color: hsl(var(--secondary));
 }
 
 .warningAmount {
-  color: hsl(38, 92%, 50%);
+  color: hsl(var(--accent));
 }
 
 .overAmount {
-  color: hsl(0, 72%, 51%);
+  color: hsl(4 62% 48%);
 }
 
 .alert {
   margin-top: 0.75rem;
   padding: 0.5rem 0.75rem;
-  background: hsl(0, 72%, 51%, 0.1);
-  border: 1px solid hsl(0, 72%, 51%, 0.3);
+  background: hsl(4 62% 48% / 0.08);
+  border: 1px solid hsl(4 62% 48% / 0.25);
   border-radius: var(--radius-sm);
-  color: hsl(0, 72%, 51%);
-  font-size: 0.875rem;
+  color: hsl(4 62% 42%);
+  font-size: 0.82rem;
   font-weight: 500;
 }
 
 .warningAlert {
   margin-top: 0.75rem;
   padding: 0.5rem 0.75rem;
-  background: hsl(38, 92%, 50%, 0.1);
-  border: 1px solid hsl(38, 92%, 50%, 0.3);
+  background: hsl(var(--accent) / 0.1);
+  border: 1px solid hsl(var(--accent) / 0.25);
   border-radius: var(--radius-sm);
-  color: hsl(38, 92%, 50%);
-  font-size: 0.875rem;
+  color: hsl(var(--accent));
+  font-size: 0.82rem;
   font-weight: 500;
 }
 
@@ -114,8 +125,10 @@
   .details {
     gap: 1rem;
   }
-  
-  .spent, .remaining, .total {
+
+  .spent,
+  .remaining,
+  .total {
     flex: 1;
     min-width: 80px;
   }

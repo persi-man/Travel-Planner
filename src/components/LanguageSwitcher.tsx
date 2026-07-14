@@ -5,8 +5,8 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import styles from './LanguageSwitcher.module.css';
 
 const languages = [
-  { code: 'en', flag: '🇬🇧', name: 'English' },
-  { code: 'fr', flag: '🇫🇷', name: 'Français' }
+  { code: 'en', name: 'English' },
+  { code: 'fr', name: 'Français' },
 ] as const;
 
 export default function LanguageSwitcher() {
@@ -14,9 +14,8 @@ export default function LanguageSwitcher() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const currentLang = languages.find(l => l.code === language) || languages[0];
+  const currentLang = languages.find((l) => l.code === language) || languages[0];
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -29,13 +28,14 @@ export default function LanguageSwitcher() {
 
   return (
     <div ref={dropdownRef} className={styles.wrapper}>
-      <button 
+      <button
         className={styles.trigger}
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
+        type="button"
       >
-        <span className={styles.flag}>{currentLang.flag}</span>
-        <span className={styles.arrow}>{isOpen ? '▲' : '▼'}</span>
+        <span className={styles.code}>{currentLang.code.toUpperCase()}</span>
+        <span className={styles.chevron}>{isOpen ? '▲' : '▼'}</span>
       </button>
 
       {isOpen && (
@@ -48,8 +48,8 @@ export default function LanguageSwitcher() {
                 setIsOpen(false);
               }}
               className={`${styles.option} ${language === lang.code ? styles.active : ''}`}
+              type="button"
             >
-              <span className={styles.optionFlag}>{lang.flag}</span>
               <span className={styles.optionName}>{lang.name}</span>
             </button>
           ))}
