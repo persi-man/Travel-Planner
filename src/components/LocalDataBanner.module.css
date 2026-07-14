@@ -1,0 +1,21 @@
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  margin-bottom: 1.5rem;
+  background: hsl(var(--surface) / 0.8);
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: hsl(var(--text-dim));
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
+.banner p {
+  margin: 0;
+  line-height: 1.4;
+}

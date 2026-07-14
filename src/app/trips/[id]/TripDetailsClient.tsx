@@ -12,6 +12,19 @@ import { useDraggable, useDroppable } from '@dnd-kit/core';
 import LocationInput from '@/components/LocationInput';
 import BudgetTracker from '@/components/BudgetTracker';
 import { useLanguage } from '@/i18n/LanguageContext';
+import {
+  getTripById,
+  updateTrip,
+  deleteTrip,
+  createActivity,
+  updateActivity,
+  deleteActivity,
+  type Trip,
+  type Activity,
+  type Day,
+} from '@/lib/db';
+import { safeParseImageArray } from '@/lib/safeJson';
+import { isSafeImageSrc, validateImportFile } from '@/lib/validation';
 import styles from './page.module.css';
 
 // Helper function to extract text from PDF
@@ -38,39 +51,6 @@ const extractPDFText = async (arrayBuffer: ArrayBuffer): Promise<string> => {
     return '';
   }
 };
-
-interface Activity {
-  id: string;
-  type: string;
-  title: string;
-  description?: string;
-  startTime?: string;
-  endTime?: string;
-  cost?: number;
-  currency?: string;
-  location?: string;
-  images?: string; // JSON string
-}
-
-interface Day {
-  id: string;
-  date: string;
-  index: number;
-  note?: string;
-  activities: Activity[];
-}
-
-interface Trip {
-  id: string;
-  title: string;
-  destination: string;
-  startDate: string;
-  endDate: string;
-  budget: number;
-  currency?: string;
-  coverImage?: string;
-  days: Day[];
-}
 
 // Draggable Activity Component
 function DraggableActivity({ activityId, children }: { activityId: string; children: React.ReactNode }) {
@@ -151,11 +131,9 @@ export default function TripDetailsClient({ id }: { id: string }) {
   });
 
   const fetchTrip = useCallback(async () => {
-    console.log(`[Client] Fetching trip params ID: ${id}`);
     try {
-      const res = await fetch(`/api/trips/${id}`);
-      if (!res.ok) throw new Error('Failed');
-      const data = await res.json();
+      const data = await getTripById(id);
+      if (!data) throw new Error('Trip not found');
       setTrip(data);
     } catch (err) {
       console.error(err);
@@ -170,7 +148,7 @@ export default function TripDetailsClient({ id }: { id: string }) {
 
   const handleCreateActivity = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedDayId) return;
+    if (!form.id && !selectedDayId) return;
 
     try {
       // Logic to handle custom type
@@ -199,18 +177,32 @@ export default function TripDetailsClient({ id }: { id: string }) {
           }
       }
 
-      await fetch('/api/activities', {
-        method: form.id ? 'PATCH' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          // id and dayId are spread from ...form
-          ...form,
+      if (form.id) {
+        await updateActivity({
+          id: form.id,
+          dayId: form.dayId,
           type: finalType,
-          cost: form.cost ? parseFloat(form.cost) : 0,
+          title: form.title,
+          description: form.description,
+          location: form.location,
           startTime: startDateTime,
-          images: imageArray
-        })
-      });
+          cost: form.cost ? parseFloat(form.cost) : 0,
+          currency: form.currency,
+          images: imageArray,
+        });
+      } else {
+        await createActivity({
+          dayId: form.dayId,
+          type: finalType,
+          title: form.title,
+          description: form.description,
+          location: form.location,
+          startTime: startDateTime,
+          cost: form.cost ? parseFloat(form.cost) : 0,
+          currency: form.currency,
+          images: imageArray,
+        });
+      }
       setShowAddModal(false);
       // Reset form
       setForm({ id: '', type: 'activity', customType: '', title: '', description: '', dayId: '', time: '', cost: '', currency: 'EUR', location: '', images: '' });
@@ -225,11 +217,7 @@ export default function TripDetailsClient({ id }: { id: string }) {
       if (!trip) return;
       
       try {
-        await fetch(`/api/trips/${id}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(tripForm)
-        });
+        await updateTrip(id, tripForm);
         setShowEditTripModal(false);
         fetchTrip();
       } catch (err) {
@@ -268,7 +256,7 @@ export default function TripDetailsClient({ id }: { id: string }) {
           cost: act.cost ? act.cost.toString() : '',
           currency: act.currency || 'EUR',
           location: act.location || '',
-          images: act.images ? JSON.parse(act.images as unknown as string).join('|') : ''
+          images: act.images ? safeParseImageArray(act.images as unknown as string).join('|') : ''
       });
       setShowAddModal(true);
   };
@@ -288,7 +276,7 @@ export default function TripDetailsClient({ id }: { id: string }) {
   const handleDeleteTrip = async () => {
     if (!confirm('Are you sure you want to delete this trip? This cannot be undone.')) return;
     try {
-        await fetch(`/api/trips/${id}`, { method: 'DELETE' });
+        await deleteTrip(id);
         router.push('/');
     } catch (err) {
         console.error(err);
@@ -299,7 +287,7 @@ export default function TripDetailsClient({ id }: { id: string }) {
   const handleDeleteActivity = async (actId: string) => {
     if(!confirm('Delete this activity?')) return;
     try {
-        await fetch(`/api/activities?id=${actId}`, { method: 'DELETE' });
+        await deleteActivity(actId);
         fetchTrip();
     } catch (err) {
         console.error(err);
@@ -325,11 +313,7 @@ export default function TripDetailsClient({ id }: { id: string }) {
     // Only update if dropped on a different day
     if (currentDayId && newDayId !== currentDayId) {
       try {
-        await fetch('/api/activities', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: activityId, dayId: newDayId })
-        });
+        await updateActivity({ id: activityId, dayId: newDayId });
         fetchTrip();
       } catch (err) {
         console.error('Drag failed:', err);
@@ -500,7 +484,7 @@ export default function TripDetailsClient({ id }: { id: string }) {
         // Activity images (max 3, side by side)
         if (act.images) {
           try {
-            const imgArray = JSON.parse(act.images as unknown as string);
+            const imgArray = safeParseImageArray(act.images as unknown as string);
             if (imgArray.length > 0) {
               let imgX = 18;
               imgArray.slice(0, 4).forEach((imgSrc: string) => {
@@ -878,6 +862,13 @@ END:VEVENT
   const handleImportActivities = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !trip) return;
+
+    const fileCheck = validateImportFile(file);
+    if (!fileCheck.ok) {
+      alert(fileCheck.error);
+      e.target.value = '';
+      return;
+    }
     
     const reader = new FileReader();
     const fileName = file.name.toLowerCase();
@@ -1001,19 +992,15 @@ END:VEVENT
           const dayId = selectedDayId || trip.days[0]?.id;
           if (!dayId) continue;
           
-          await fetch('/api/activities', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              dayId,
-              title: act.title || act.Activity || 'Imported Activity',
-              type: act.type || act.Type || 'activity',
-              description: act.description || act.Description || act.Details || '',
-              location: act.location || act.Location || '',
-              cost: act.cost || act.Cost || 0,
-              currency: act.currency || 'EUR',
-              images: '[]'
-            })
+          await createActivity({
+            dayId,
+            title: act.title || act.Activity || 'Imported Activity',
+            type: act.type || act.Type || 'activity',
+            description: act.description || act.Description || act.Details || '',
+            location: act.location || act.Location || '',
+            cost: act.cost || act.Cost || 0,
+            currency: act.currency || 'EUR',
+            images: [],
           });
           importedCount++;
         }
@@ -1050,7 +1037,7 @@ END:VEVENT
 
       {/* 2. Hero Section */}
       <div className={styles.hero}>
-        {trip.coverImage && <img src={trip.coverImage} className={styles.heroImage} alt="Cover" />}
+        {trip.coverImage && isSafeImageSrc(trip.coverImage) && <img src={trip.coverImage} className={styles.heroImage} alt="Cover" />}
         <div className={styles.heroOverlay} />
         
         <div className={styles.heroContent}>
@@ -1068,7 +1055,7 @@ END:VEVENT
                     <span className={styles.statLabel}>{t('trip.duration')}</span>
                     <span className={styles.statValue}>{Math.ceil((new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 3600 * 24))} {t('trip.days')}</span>
                 </div>
-                {trip.budget > 0 && (
+                {(trip.budget ?? 0) > 0 && (
                     <div className={styles.statItem}>
                         <span className={styles.statLabel}>{t('trip.budget')}</span>
                         <span className={styles.statValue}>{trip.currency || '$'} {trip.budget}</span>
@@ -1202,18 +1189,22 @@ END:VEVENT
                           </p>
                         )}
                         {act.description && <p style={{opacity:0.8, fontSize:'0.9rem'}}>{act.description.substring(0, 100)}{act.description.length > 100 ? '...' : ''}</p>}
-                        {act.images && (
+                        {act.images && (() => {
+                          const imgs = safeParseImageArray(act.images as unknown as string);
+                          if (imgs.length === 0) return null;
+                          return (
                           <div style={{display:'flex', gap:'0.5rem', marginTop:'0.5rem', overflowX:'auto', paddingBottom:'0.25rem'}}>
-                              {JSON.parse(act.images as unknown as string).slice(0, 3).map((img: string, idx: number) => (
+                              {imgs.slice(0, 3).map((img: string, idx: number) => (
                                   <img key={idx} src={img} alt={`Activity ${idx+1}`} style={{width:'48px', height:'48px', objectFit:'cover', borderRadius:'0.375rem', border:'1px solid hsl(var(--border))', flexShrink:0}} />
                               ))}
-                              {JSON.parse(act.images as unknown as string).length > 3 && (
+                              {imgs.length > 3 && (
                                 <div style={{width:'48px', height:'48px', display:'flex', alignItems:'center', justifyContent:'center', background:'hsl(var(--surface))', borderRadius:'0.375rem', fontSize:'0.8rem', color:'hsl(var(--text-dim))'}}>
-                                  +{JSON.parse(act.images as unknown as string).length - 3}
+                                  +{imgs.length - 3}
                                 </div>
                               )}
                           </div>
-                        )}
+                          );
+                        })()}
                       </div>
                       <div className={styles.cost} onClick={e => e.stopPropagation()}>
                           {act.cost ? `${act.cost} ${act.currency || ''}` : ''}
@@ -1451,8 +1442,8 @@ END:VEVENT
               <div style={{marginBottom:'1rem'}}>
                 <strong>Photos</strong>
                 <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(120px, 1fr))', gap:'0.5rem', marginTop:'0.5rem'}}>
-                  {JSON.parse(viewActivity.images as unknown as string).map((img: string, idx: number) => (
-                    <img key={idx} src={img} alt={`Photo ${idx+1}`} style={{width:'100%', height:'100px', objectFit:'cover', borderRadius:'0.5rem', cursor:'pointer'}} onClick={(e) => { e.stopPropagation(); window.open(img, '_blank'); }} />
+                  {safeParseImageArray(viewActivity.images as unknown as string).map((img: string, idx: number) => (
+                    <img key={idx} src={img} alt={`Photo ${idx+1}`} style={{width:'100%', height:'100px', objectFit:'cover', borderRadius:'0.5rem', cursor:'pointer'}} onClick={(e) => { e.stopPropagation(); if (isSafeImageSrc(img)) window.open(img, '_blank'); }} />
                   ))}
                 </div>
               </div>

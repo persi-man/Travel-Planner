@@ -18,6 +18,17 @@ export const metadata: Metadata = {
   description: "Plan your next adventure with ease.",
 };
 
+const cspContent = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' cdnjs.cloudflare.com",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "connect-src 'self' api.exchangerate-api.com nominatim.openstreetmap.org",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join("; ");
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,6 +36,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <meta httpEquiv="Content-Security-Policy" content={cspContent} />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ClientProviders>
           {children}
@@ -33,4 +47,3 @@ export default function RootLayout({
     </html>
   );
 }
-

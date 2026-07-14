@@ -6,8 +6,9 @@
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Status](https://img.shields.io/badge/status-stable-green.svg)
-![Next.js](https://img.shields.io/badge/Next.js-15-black)
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+![GitHub Pages](https://img.shields.io/badge/deploy-GitHub%20Pages-blue)
 
 **Travel Planner** is a comprehensive full-stack application designed to simplify the complexity of long-term travel planning. Organize your trips day-by-day, manage budgets, and export your itineraries for offline use—all in a beautifully designed, modern interface.
 
@@ -20,7 +21,7 @@
 - **Export Functionality**:
   - 📄 **PDF**: Download printable itineraries.
   - 📊 **Excel**: Export data for spreadsheet analysis.
-- **Full Persistence**: Data is securely stored using a local SQLite database.
+- **Full Persistence**: Data is stored in your browser (IndexedDB). Export JSON to back up.
 
 ## 📸 Demo
 
@@ -30,16 +31,16 @@
 
 See [QUICKSTART.md](./QUICKSTART.md) for detailed installation and setup instructions.
 
+**Live demo**: [https://persi-man.github.io/Travel-Planner/](https://persi-man.github.io/Travel-Planner/)
+
 ```bash
-# Quick Setup (Local)
+# Local development
 git clone https://github.com/persi-man/Travel-Planner
 npm install
-npx prisma db push
 npm run dev
 
-# Quick Setup (Docker)
-docker-compose up -d --build
-docker-compose exec app npx prisma@6 db push
+# Build for GitHub Pages
+npm run build:pages
 ```
 
 ## 📖 Documentation
@@ -49,8 +50,8 @@ For a deep dive into the architecture, database schema, and code structure, plea
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js (App Router), React, CSS Modules
-- **Backend**: Next.js API Routes
-- **Database**: SQLite, Prisma ORM
+- **Storage**: IndexedDB (browser-local)
+- **Deployment**: GitHub Pages (static export)
 - **Utilities**: jsPDF, SheetJS (xlsx)
 
 ## License

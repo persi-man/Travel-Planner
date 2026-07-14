@@ -43,10 +43,13 @@ next-env.d.ts
 
 /src/generated/prisma
 
-# Database
+# Database (SQLite legacy)
 dev.db
-db/
+/db/
 db_data/
+
+# Local GitHub Pages preview
+.preview/
 
 # Test files
 test_*.js

@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { Upload } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useLanguage } from '@/i18n/LanguageContext';
+import LocalDataBanner from '@/components/LocalDataBanner';
+import { listTrips, createTrip, createActivity, type TripListItem } from '@/lib/db';
+import { isSafeImageSrc, validateImportFile, validateImportRowCount } from '@/lib/validation';
 import styles from './page.module.css';
 
 // Helper function to extract text from PDF
@@ -33,34 +36,16 @@ const extractPDFText = async (arrayBuffer: ArrayBuffer): Promise<string> => {
   }
 };
 
-interface Trip {
-  id: string;
-  title: string;
-  destination: string;
-  startDate: string;
-  endDate: string;
-  coverImage?: string;
-  _count: {
-    days: number;
-  };
-}
-
 export default function Home() {
-  const [trips, setTrips] = useState<Trip[]>([]);
+  const [trips, setTrips] = useState<TripListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const importFileRef = useRef<HTMLInputElement>(null);
   const { t, language } = useLanguage();
 
   const fetchTrips = () => {
-    fetch('/api/trips')
-      .then((res) => res.json())
+    listTrips()
       .then((data) => {
-        if (Array.isArray(data)) {
-            setTrips(data);
-        } else {
-            console.error("API returned non-array:", data);
-            setTrips([]);
-        }
+        setTrips(data);
         setLoading(false);
       })
       .catch((err) => {
@@ -76,6 +61,13 @@ export default function Home() {
   const handleImportTrip = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const fileCheck = validateImportFile(file);
+    if (!fileCheck.ok) {
+      alert(fileCheck.error);
+      e.target.value = '';
+      return;
+    }
     
     const reader = new FileReader();
     const fileName = file.name.toLowerCase();
@@ -222,7 +214,11 @@ export default function Home() {
           const sheet = workbook.Sheets[sheetName];
           const jsonData = XLSX.utils.sheet_to_json(sheet);
           
-          console.log('Excel data parsed:', jsonData); // Debug
+          const rowCheck = validateImportRowCount(jsonData.length);
+          if (!rowCheck.ok) {
+            alert(rowCheck.error);
+            return;
+          }
           
           if (jsonData.length > 0) {
             const firstRow: any = jsonData[0];
@@ -315,63 +311,28 @@ export default function Home() {
           return;
         }
         
-        console.log('Parsed trip data:', tripData); // Debug log
+        console.log('Parsed trip data:', tripData);
         
-        // Create the trip via API
-        const response = await fetch('/api/trips', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: tripData.title,
-            destination: tripData.destination || 'Unknown',
-            startDate: tripData.startDate || new Date().toISOString(),
-            endDate: tripData.endDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-            budget: tripData.budget || 0,
-            currency: tripData.currency || 'EUR'
-          })
+        const newTrip = await createTrip({
+          title: tripData.title,
+          destination: tripData.destination || 'Unknown',
+          startDate: tripData.startDate || new Date().toISOString(),
+          endDate: tripData.endDate || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          budget: tripData.budget || 0,
+          currency: tripData.currency || 'EUR',
         });
         
-        if (response.ok) {
-          const newTrip = await response.json();
-          let activitiesImported = 0;
-          
-          // Handle activities from days structure (JSON export format)
-          if (tripData.days && Array.isArray(tripData.days)) {
-            for (let i = 0; i < tripData.days.length && i < newTrip.days.length; i++) {
-              const dayData = tripData.days[i];
-              const targetDayId = newTrip.days[i]?.id;
-              
-              if (dayData.activities && targetDayId) {
-                for (const act of dayData.activities) {
-                  await fetch('/api/activities', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      dayId: targetDayId,
-                      title: act.title || 'Activity',
-                      type: act.type || 'activity',
-                      description: act.description || '',
-                      location: act.location || '',
-                      startTime: act.startTime || null,
-                      cost: act.cost || 0,
-                      currency: act.currency || 'EUR',
-                      images: '[]'
-                    })
-                  });
-                  activitiesImported++;
-                }
-              }
-            }
-          }
-          
-          // Handle flat activities array
-          if (tripData.activities && Array.isArray(tripData.activities) && newTrip.days?.length > 0) {
-            for (const act of tripData.activities) {
-              await fetch('/api/activities', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  dayId: newTrip.days[0].id,
+        let activitiesImported = 0;
+        
+        if (tripData.days && Array.isArray(tripData.days)) {
+          for (let i = 0; i < tripData.days.length && i < newTrip.days.length; i++) {
+            const dayData = tripData.days[i];
+            const targetDayId = newTrip.days[i]?.id;
+            
+            if (dayData.activities && targetDayId) {
+              for (const act of dayData.activities) {
+                await createActivity({
+                  dayId: targetDayId,
                   title: act.title || 'Activity',
                   type: act.type || 'activity',
                   description: act.description || '',
@@ -379,18 +340,33 @@ export default function Home() {
                   startTime: act.startTime || null,
                   cost: act.cost || 0,
                   currency: act.currency || 'EUR',
-                  images: '[]'
-                })
-              });
-              activitiesImported++;
+                  images: [],
+                });
+                activitiesImported++;
+              }
             }
           }
-          
-          alert(`Trip "${tripData.title}" imported successfully!\n${activitiesImported > 0 ? `${activitiesImported} activities imported.` : ''}`);
-          fetchTrips();
-        } else {
-          alert('Failed to import trip. Please try again.');
         }
+        
+        if (tripData.activities && Array.isArray(tripData.activities) && newTrip.days?.length > 0) {
+          for (const act of tripData.activities) {
+            await createActivity({
+              dayId: newTrip.days[0].id,
+              title: act.title || 'Activity',
+              type: act.type || 'activity',
+              description: act.description || '',
+              location: act.location || '',
+              startTime: act.startTime || null,
+              cost: act.cost || 0,
+              currency: act.currency || 'EUR',
+              images: [],
+            });
+            activitiesImported++;
+          }
+        }
+        
+        alert(`Trip "${tripData.title}" imported successfully!\n${activitiesImported > 0 ? `${activitiesImported} activities imported.` : ''}`);
+        fetchTrips();
       } catch (err) {
         alert('Error reading file. Please check the format and try again.');
         console.error(err);
@@ -431,6 +407,8 @@ export default function Home() {
           </div>
         </header>
 
+        <LocalDataBanner />
+
         {loading ? (
           <div style={{ textAlign: 'center', padding: '4rem', color: 'hsl(var(--text-dim))' }}>
             {t('common.loading')}
@@ -447,7 +425,7 @@ export default function Home() {
             {trips.map((trip) => (
               <Link href={`/trips/${trip.id}`} key={trip.id} className={styles.card}>
                 <div className={styles.cardImage}>
-                  {trip.coverImage ? (
+                  {trip.coverImage && isSafeImageSrc(trip.coverImage) ? (
                     <img src={trip.coverImage} alt={trip.title} />
                   ) : (
                     <div className={styles.cardImagePlaceholder} />

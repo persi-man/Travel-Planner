@@ -1,95 +1,69 @@
 # Quickstart Guide
 
-This guide will help you set up and run the Travel Planner application locally.
+## Live app (GitHub Pages)
 
-## Prerequisites
+The app runs entirely in your browser — no server, no account:
 
-Before you begin, ensure you have the following installed on your system:
+**https://persi-man.github.io/Travel-Planner/**
 
-- **Node.js**: Version 18.17 or higher (Recommended: LTS)
-- **npm**: Installed automatically with Node.js
-- **Git**: For version control
+Your trips are stored in IndexedDB (local to your browser). Export as JSON regularly to back up.
 
-## Installation
+---
 
-1.  **Clone the repository** (if not already done):
-
-    ```bash
-    git clone <repository-url>
-    cd travel-planner
-    ```
-
-2.  **Install dependencies**:
-
-    ```bash
-    npm install
-    ```
-
-3.  **Initialize the Database**:
-    This command will create the local SQLite database (`dev.db`) and apply the schema.
-    ```bash
-    npx prisma db push
-    ```
-
-## Running the Application
-
-### Development Mode
-
-To start the development server with hot-reloading:
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-### Production Build
-
-To verify the application as it would run in production:
-
-1.  **Build the application**:
-
-    ```bash
-    npm run build
-    ```
-
-2.  **Start the production server**:
-    ```bash
-    npm start
-    ```
-
-## Common Issues
-
-- **Database Errors**: If you encounter errors related to the database, try running `npx prisma generate` to refresh the Prisma Client.
-- **Port In Use**: If port 3000 is occupied, Next.js will automatically try 3001. Check the terminal output for the correct URL.
-
-## Running with Docker
-
-We provide a Docker setup to run the application in a consistent containerized environment.
+## Local development
 
 ### Prerequisites
 
-- **Docker** and **Docker Compose** installed.
+- **Node.js** 18.17+ (LTS recommended)
+- **npm**
 
-### Steps
+### Setup
 
-1.  **Start the Container**:
+```bash
+git clone https://github.com/persi-man/Travel-Planner
+cd Travel-Planner
+npm install
+npm run dev
+```
 
-    ```bash
-    docker-compose up -d --build
-    ```
+Open [http://127.0.0.1:3000](http://127.0.0.1:3000).
 
-2.  **Initialize Database (First Time Only)**:
-    Since the database is running inside the container (or mapped volume), you need to push the schema:
+### Build for GitHub Pages
 
-    ```bash
-    docker-compose exec app npx prisma@6 db push
-    ```
+```bash
+npm run build:pages
+```
 
-3.  **Access the App**:
-    Open [http://localhost:3000](http://localhost:3000).
+Output is in the `out/` folder. To preview locally:
 
-4.  **Stop**:
-    ```bash
-    docker-compose down
-    ```
+```bash
+npx serve out -l 3000
+```
+
+Then open [http://127.0.0.1:3000/Travel-Planner/](http://127.0.0.1:3000/Travel-Planner/).
+
+### Smoke tests
+
+```bash
+# Against dev server
+npm run test:smoke
+
+# Against static build preview
+npm run test:smoke:pages
+```
+
+---
+
+## Deploy to GitHub Pages
+
+1. Push to the `master` branch
+2. GitHub Actions workflow `.github/workflows/deploy-pages.yml` builds and deploys automatically
+3. Enable Pages in repo Settings → Pages → Source: **GitHub Actions**
+
+---
+
+## Common issues
+
+- **Port in use**: Next.js will try 3001 — check terminal output
+- **Data lost after clearing browser**: Export trips as JSON before clearing site data
+- **GitHub Pages 404 on direct URL**: The build copies `index.html` to `404.html` for SPA routing

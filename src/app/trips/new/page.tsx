@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Upload } from 'lucide-react';
 import LocationInput from '@/components/LocationInput';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { createTrip } from '@/lib/db';
 import styles from './page.module.css';
 
 export default function NewTripPage() {
@@ -55,17 +56,7 @@ export default function NewTripPage() {
     setError('');
 
     try {
-      const res = await fetch('/api/trips', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to create trip');
-      }
-
+      await createTrip(form);
       router.push('/');
       router.refresh();
     } catch (err: any) {

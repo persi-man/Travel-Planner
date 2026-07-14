@@ -24,6 +24,7 @@
     "newTrip": "New Trip",
     "importTrip": "Import Trip",
     "noTrips": "No trips yet. Create your first adventure!",
+    "localDataNotice": "Your trips are stored locally in this browser. Export regularly as JSON to back up your data.",
     "tripCard": {
       "days": "days",
       "budget": "Budget"

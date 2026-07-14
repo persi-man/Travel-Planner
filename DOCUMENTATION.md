@@ -2,87 +2,111 @@
 
 ## Overview
 
-Travel Planner is a full-stack web application designed for creating, managing, and sharing detailed travel itineraries. It allows users to plan trips day-by-day, track budgets, and export plans to professional formats.
+Travel Planner is a **static web application** for creating, managing, and exporting detailed travel itineraries. Data is stored locally in the browser via **IndexedDB** — no server, no account required.
+
+**Live app**: https://persi-man.github.io/Travel-Planner/
 
 ## Architecture
 
 ### Tech Stack
 
-- **Framework**: [Next.js 15](https://nextjs.org/) (App Router)
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router, static export)
 - **Language**: TypeScript
-- **Database**: SQLite
-- **ORM**: [Prisma](https://www.prisma.io/)
-- **Styling**: CSS Modules with a custom Design System (Variables)
+- **Storage**: IndexedDB (browser-local, per device)
+- **Styling**: CSS Modules with a custom Design System
 - **Export**: `jspdf` (PDF), `xlsx` (Excel)
+- **Deployment**: GitHub Pages via GitHub Actions
 - **Icons**: Lucide React
 
 ### Folder Structure
 
 ```
 src/
-├── app/                 # App Router (Pages & API)
-│   ├── api/             # Backend API Routes
-│   │   ├── trips/       # Trip CRUD
-│   │   └── activities/  # Activity CRUD
-│   ├── trips/           # Trip-specific Pages
-│   │   ├── [id]/        # Trip Details / Timeline
-│   │   └── new/         # Create Trip Form
-│   ├── globals.css      # Global Styles & Variables
-│   ├── layout.tsx       # Root Layout
-│   └── page.tsx         # Home Dashboard
+├── app/                    # App Router (Pages)
+│   ├── page.tsx            # Home dashboard
+│   ├── trips/
+│   │   ├── new/            # Create trip form
+│   │   └── [id]/           # Trip detail / timeline
+│   ├── layout.tsx          # Root layout + CSP
+│   └── globals.css
+├── components/             # UI components
 ├── lib/
-│   └── prisma.ts        # Prisma Client Singleton
-└── component/           # (Reserved for reusable UI components)
+│   ├── db/                 # IndexedDB data layer
+│   │   ├── store.ts        # IDB connection
+│   │   ├── trips.ts        # Trip CRUD
+│   │   ├── activities.ts   # Activity CRUD
+│   │   └── types.ts
+│   ├── validation.ts       # Input validation
+│   ├── safeJson.ts         # Safe JSON/image parsing
+│   └── currency.ts         # Exchange rates
+└── i18n/                   # FR / EN translations
 ```
 
-## Features Deep Dive
+## Data Model
 
-### 1. Trip Management
+### Trip
 
-- **Create**: Users can create trips with a title, destination, date range, and optional budget/cover image.
-- **Logic**: Upon creation, the backend automatically calculates the number of days between start/end dates and pre-populates `Day` records in the database.
+| Field       | Type   | Description           |
+| ----------- | ------ | --------------------- |
+| id          | string | UUID                  |
+| title       | string | Trip name             |
+| destination | string | Target location       |
+| startDate   | ISO    | Start date            |
+| endDate     | ISO    | End date              |
+| budget      | number | Optional total budget |
+| currency    | string | e.g. EUR              |
+| coverImage  | string | data:image base64     |
+| days        | Day[]  | Nested day records    |
 
-### 2. Day-by-Day Planning
+### Day
 
-- **Visual Timeline**: Each day is displayed as a card containing a list of activities.
-- **Activity Types**: Supports various types: Activity, Food, Lodging, and Travel.
-- **Cost Tracking**: Each activity can have an associated cost, which aids in budget planning.
+| Field      | Type       | Description     |
+| ---------- | ---------- | --------------- |
+| id         | string     | UUID            |
+| date       | ISO        | Specific date   |
+| index      | number     | Day number      |
+| activities | Activity[] | Nested activities |
 
-### 3. Data Export
+### Activity
 
-- **PDF Generation**: Generates a clean, printable itinerary using `jspdf-autotable`. Includes trip summary and a chronological table of activities.
-- **Excel Export**: Exports raw data using `xlsx` (SheetJS) for users who want to manipulate their itinerary data in spreadsheets.
+| Field       | Type   | Description                          |
+| ----------- | ------ | ------------------------------------ |
+| id          | string | UUID                                 |
+| type        | string | activity, food, lodging, travel      |
+| title       | string | Name                                 |
+| startTime   | ISO    | Optional time                        |
+| cost        | number | Optional cost                        |
+| location    | string | Optional location                    |
+| images      | string | JSON array of data:image URLs        |
 
-## Database Schema
+## Features
 
-### `Trip`
+- **Trip management**: Create, edit, delete with automatic day generation
+- **Day-by-day timeline**: Activities with drag & drop between days
+- **Budget tracking**: Multi-currency with live exchange rates
+- **Import / Export**: JSON, PDF, Excel, Markdown, ICS, Google Calendar
+- **i18n**: French and English
+- **Theme**: Light / dark mode
 
-| Field       | Type          | Description           |
-| ----------- | ------------- | --------------------- |
-| id          | String (UUID) | Primary Key           |
-| title       | String        | Trip Name             |
-| destination | String        | Target Location       |
-| startDate   | DateTime      |                       |
-| endDate     | DateTime      |                       |
-| budget      | Float         | Optional total budget |
-| coverImage  | String        | URL for UI visual     |
+## Build & Deploy
 
-### `Day`
+```bash
+# Local dev
+npm run dev
 
-| Field  | Type          | Description               |
-| ------ | ------------- | ------------------------- |
-| id     | String (UUID) | Primary Key               |
-| date   | DateTime      | Specific date of the trip |
-| index  | Int           | Day number (0, 1, 2...)   |
-| tripId | String        | FK to Trip                |
+# Build for GitHub Pages
+npm run build:pages
 
-### `Activity`
+# Preview static build locally
+npm run preview:pages
 
-| Field     | Type          | Description                     |
-| --------- | ------------- | ------------------------------- |
-| id        | String (UUID) | Primary Key                     |
-| type      | String        | activity, food, lodging, travel |
-| title     | String        | Name of activity                |
-| startTime | DateTime      |                                 |
-| cost      | Float         |                                 |
-| dayId     | String        | FK to Day                       |
+# Smoke tests
+npm run test:smoke
+npm run test:smoke:pages
+```
+
+Push to `master` triggers automatic deploy via `.github/workflows/deploy-pages.yml`.
+
+## Security
+
+See [SECURITY.md](./SECURITY.md) for the threat model and mitigations.

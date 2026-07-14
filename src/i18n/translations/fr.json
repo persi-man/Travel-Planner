@@ -24,6 +24,7 @@
     "newTrip": "Nouveau Voyage",
     "importTrip": "Importer un Voyage",
     "noTrips": "Aucun voyage pour le moment. Créez votre première aventure !",
+    "localDataNotice": "Vos voyages sont stockés localement dans ce navigateur. Exportez régulièrement en JSON pour sauvegarder vos données.",
     "tripCard": {
       "days": "jours",
       "budget": "Budget"
