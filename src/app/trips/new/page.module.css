@@ -1,64 +1,73 @@
 .main {
   min-height: 100vh;
-  padding: 3.5rem 2rem 4rem;
+  padding: 2rem 1.25rem 4rem;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
 }
 
 .container {
   width: 100%;
-  max-width: 520px;
+  max-width: var(--content-w);
+}
+
+.topRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid hsl(var(--ink));
+  margin-bottom: 1.5rem;
+}
+
+.backLink {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: hsl(var(--ink-muted));
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .title {
-  font-size: clamp(1.75rem, 3vw, 2.25rem);
-  margin-bottom: 1.75rem;
-  text-align: left;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.75rem, 5vw, 2.25rem);
+  font-weight: 700;
+  margin-bottom: 1.5rem;
 }
 
 .formCard {
-  background: hsl(var(--surface));
-  padding: 2rem;
-  border-radius: var(--radius-lg);
-  border: 1px solid hsl(var(--border));
-  box-shadow: var(--shadow-sm);
+  border-top: 1px solid hsl(var(--rule));
+  padding-top: 1.5rem;
 }
 
 .field {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.35rem;
+  position: relative;
+}
+
+.field:has([data-suggestions-open='true']) {
+  z-index: 100;
 }
 
 .label {
   display: block;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 600;
   margin-bottom: 0.4rem;
-  color: hsl(var(--text-dim));
+  color: hsl(var(--ink-muted));
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
 }
 
 .input {
   width: 100%;
-  padding: 0.65rem 0.85rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid hsl(var(--border));
-  background: hsl(var(--surface));
-  color: hsl(var(--text-main));
+  min-height: 2.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid hsl(var(--rule));
+  background: hsl(var(--paper-raised));
+  color: hsl(var(--ink));
   font-family: inherit;
-  font-size: 0.95rem;
-  transition: border-color 0.16s var(--ease-out), box-shadow 0.16s var(--ease-out);
-}
-
-.input::placeholder {
-  color: hsl(var(--text-dim));
-}
-
-.input:focus {
-  outline: none;
-  border-color: hsl(var(--primary));
-  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.1);
+  font-size: 1.0625rem;
 }
 
 .row,
@@ -69,62 +78,53 @@
 }
 
 .formGroup {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.35rem;
+}
+
+.formGroup label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  color: hsl(var(--ink-muted));
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .actions {
   display: flex;
-  gap: 0.75rem;
-  margin-top: 1.75rem;
+  gap: 1.25rem;
+  align-items: center;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid hsl(var(--rule));
 }
 
 .cancelButton {
-  flex: 1;
-  padding: 0.65rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid hsl(var(--border));
-  background: transparent;
-  color: hsl(var(--text-main));
-  font-weight: 600;
-  font-size: 0.9rem;
-  text-align: center;
-  transition: border-color 0.16s var(--ease-out);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .cancelButton:hover {
-    border-color: hsl(var(--text-dim));
-  }
+  color: hsl(var(--ink-muted));
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .submitButton {
-  flex: 2;
-  padding: 0.65rem;
-  border-radius: var(--radius-sm);
-  background: hsl(var(--primary));
-  color: hsl(40 38% 98%);
-  font-weight: 600;
-  font-size: 0.9rem;
-  border: 1px solid hsl(var(--primary-dark));
-  text-align: center;
-  transition: background-color 0.16s var(--ease-out);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .submitButton:hover:not(:disabled) {
-    background: hsl(var(--primary-dark));
-  }
+  font-weight: 700;
+  color: hsl(var(--stamp));
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 2px;
+  background: none;
+  font-size: 1rem;
 }
 
 .submitButton:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .error {
-  color: hsl(4 62% 48%);
-  font-size: 0.85rem;
-  margin-top: 0.5rem;
+  color: hsl(var(--stamp));
+  font-size: 0.9rem;
 }
 
 .uploadRow {
@@ -134,58 +134,35 @@
 }
 
 .uploadLabel {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.65rem 1rem;
-  background-color: hsl(var(--background));
-  border: 1px dashed hsl(var(--border));
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: border-color 0.16s var(--ease-out), color 0.16s var(--ease-out);
-  color: hsl(var(--text-dim));
+  gap: 0.4rem;
   font-weight: 500;
-  font-size: 0.9rem;
-  width: 100%;
-  justify-content: center;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .uploadLabel:hover {
-    border-color: hsl(var(--primary));
-    color: hsl(var(--primary));
-  }
+  color: hsl(var(--ink-muted));
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .previewContainer {
-  position: relative;
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  border: 1px solid hsl(var(--border));
+  border: 1px solid hsl(var(--rule));
+  max-width: 20rem;
 }
 
 .previewImage {
   width: 100%;
-  max-height: 180px;
+  max-height: 10rem;
   object-fit: cover;
   display: block;
 }
 
 .removeButton {
   width: 100%;
-  padding: 0.5rem;
-  background: hsl(var(--surface));
-  color: hsl(4 62% 48%);
-  font-size: 0.82rem;
+  padding: 0.45rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  border-top: 1px solid hsl(var(--border));
-  transition: background 0.16s var(--ease-out);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .removeButton:hover {
-    background: hsl(4 62% 48% / 0.06);
-  }
+  color: hsl(var(--stamp));
+  border-top: 1px solid hsl(var(--rule));
 }
 
 @media (max-width: 480px) {

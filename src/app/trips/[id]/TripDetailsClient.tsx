@@ -6,11 +6,13 @@ import { useRouter } from 'next/navigation';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
-import { Trash2, Edit2, Upload, X, GripVertical, MapPin } from 'lucide-react';
+import { Trash2, Edit2, Upload, X, GripVertical } from 'lucide-react';
 import { DndContext, DragEndEvent, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import LocationInput from '@/components/LocationInput';
 import BudgetTracker from '@/components/BudgetTracker';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import ThemeToggle from '@/components/ThemeToggle';
 import { useLanguage } from '@/i18n/LanguageContext';
 import {
   getTripById,
@@ -1030,9 +1032,12 @@ END:VEVENT
       {/* 1. Navigation */}
       <nav className={styles.navBar}>
          <Link href="/" className={styles.homeLink}>
-            ⬅ {t('common.backToDashboard')}
+            ← {t('common.backToDashboard')}
          </Link>
-         {/* Theme toggle is in layout, but we could add branding here */}
+         <div className={styles.navActions}>
+           <LanguageSwitcher />
+           <ThemeToggle />
+         </div>
       </nav>
 
       {/* 2. Hero Section */}
@@ -1043,7 +1048,6 @@ END:VEVENT
         <div className={styles.heroContent}>
             <h1 className={styles.title}>{trip.title}</h1>
             <div className={styles.destination}>
-                <MapPin size={14} strokeWidth={1.75} />
                 <span>{trip.destination}</span>
             </div>
             
@@ -1285,6 +1289,7 @@ END:VEVENT
                   value={form.location} 
                   onChange={(value) => setForm({...form, location: value})}
                   placeholder={t('activity.locationPlaceholder')}
+                  language={language}
                 />
               </div>
               <div className={styles.formField}>
@@ -1356,6 +1361,7 @@ END:VEVENT
                           value={tripForm.destination} 
                           onChange={(value) => setTripForm({...tripForm, destination: value})}
                           placeholder="Enter destination..."
+                          language={language}
                         />
                     </div>
                     <div style={{display:'flex', gap:'1rem'}}>

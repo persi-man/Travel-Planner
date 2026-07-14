@@ -19,12 +19,13 @@
     "backToDashboard": "Retour au tableau de bord"
   },
   "home": {
-    "title": "Travel Planner",
-    "subtitle": "Planifiez votre prochaine aventure avec style.",
-    "newTrip": "Nouveau Voyage",
-    "importTrip": "Importer un Voyage",
-    "noTrips": "Aucun voyage pour le moment. Créez votre première aventure !",
-    "localDataNotice": "Vos voyages sont stockés localement dans ce navigateur. Exportez régulièrement en JSON pour sauvegarder vos données.",
+    "title": "Voyages",
+    "subtitle": "",
+    "newTrip": "Nouveau voyage",
+    "importTrip": "Importer",
+    "localDataTitle": "Données locales.",
+    "noTrips": "Aucun voyage enregistré.",
+    "localDataNotice": "Stockage local dans ce navigateur — pensez à exporter en JSON de temps en temps.",
     "tripCard": {
       "days": "jours",
       "budget": "Budget"

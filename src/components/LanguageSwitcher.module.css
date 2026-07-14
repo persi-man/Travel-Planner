@@ -1,80 +1,62 @@
-.wrapper {
-  position: relative;
-}
-
 .trigger {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.4rem 0.6rem;
-  background: hsl(var(--surface));
-  border: 1px solid hsl(var(--border));
-  border-radius: var(--radius-sm);
-  cursor: pointer;
+  min-height: 2.25rem;
+  padding: 0 0.5rem;
   font-size: 0.8rem;
   font-weight: 600;
-  color: hsl(var(--text-main));
-  transition: border-color 0.16s var(--ease-out);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: hsl(var(--ink-muted));
+  border: none;
+  background: none;
+  cursor: pointer;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .trigger:hover {
-    border-color: hsl(var(--primary));
+    color: hsl(var(--ink));
   }
-}
-
-.code {
-  letter-spacing: 0.04em;
-}
-
-.chevron {
-  font-size: 0.55rem;
-  color: hsl(var(--text-dim));
 }
 
 .dropdown {
   position: absolute;
   top: calc(100% + 4px);
   right: 0;
-  background: hsl(var(--card));
-  border: 1px solid hsl(var(--border));
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-md);
-  z-index: 100;
-  min-width: 120px;
-  overflow: hidden;
+  background: hsl(var(--paper-raised));
+  border: 1px solid hsl(var(--rule));
+  z-index: 200;
+  min-width: 7rem;
 }
 
 .option {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  display: block;
   width: 100%;
   padding: 0.55rem 0.75rem;
   background: transparent;
   border: none;
   cursor: pointer;
-  transition: background 0.12s var(--ease-out);
-  color: hsl(var(--text-main));
-  text-align: left;
   font-size: 0.85rem;
+  font-weight: 500;
+  text-align: left;
+  color: hsl(var(--ink));
 }
 
-.option:not(:first-child) {
-  border-top: 1px solid hsl(var(--border));
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .option:hover {
-    background: hsl(var(--primary) / 0.06);
-  }
+.option + .option {
+  border-top: 1px solid hsl(var(--rule));
 }
 
 .option.active {
-  background: hsl(var(--primary) / 0.1);
-  font-weight: 600;
+  font-weight: 700;
+  color: hsl(var(--stamp));
 }
 
-.optionName {
-  font-size: 0.85rem;
+.wrapper {
+  position: relative;
+}
+
+.chevron {
+  display: none;
+}
+
+.code {
+  letter-spacing: 0.06em;
 }

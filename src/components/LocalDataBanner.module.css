@@ -1,23 +1,15 @@
-.banner {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.625rem;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1.75rem;
-  background: hsl(var(--secondary) / 0.08);
-  border: 1px solid hsl(var(--secondary) / 0.22);
-  border-radius: var(--radius-sm);
-  font-size: 0.82rem;
-  color: hsl(var(--text-dim));
+.notice {
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: hsl(var(--ink-muted));
+  line-height: 1.55;
+  font-style: italic;
+  border-left: 3px solid hsl(var(--stamp));
+  padding-left: 0.85rem;
 }
 
-.icon {
-  flex-shrink: 0;
-  margin-top: 0.1rem;
-  color: hsl(var(--secondary));
-}
-
-.banner p {
-  margin: 0;
-  line-height: 1.45;
+.notice strong {
+  font-style: normal;
+  font-weight: 600;
+  color: hsl(var(--ink));
 }

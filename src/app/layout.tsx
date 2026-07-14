@@ -1,21 +1,23 @@
 import type { Metadata } from "next";
-import { Fraunces, DM_Sans } from "next/font/google";
+import { Cormorant_Garamond, Literata } from "next/font/google";
 import "./globals.css";
 import ClientProviders from "@/components/ClientProviders";
 
-const fraunces = Fraunces({
+const cormorant = Cormorant_Garamond({
   variable: "--font-display",
   subsets: ["latin"],
+  weight: ["500", "600", "700"],
 });
 
-const dmSans = DM_Sans({
+const literata = Literata({
   variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
-  title: "Travel Planner",
-  description: "Plan your next adventure with ease.",
+  title: "Voyages",
+  description: "Carnet de voyages local.",
 };
 
 const cspContent = [
@@ -35,14 +37,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="light">
       <head>
         <meta httpEquiv="Content-Security-Policy" content={cspContent} />
       </head>
-      <body className={`${fraunces.variable} ${dmSans.variable}`}>
-        <ClientProviders>
-          {children}
-        </ClientProviders>
+      <body className={`${cormorant.variable} ${literata.variable}`}>
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );

@@ -34,13 +34,16 @@ Open [http://127.0.0.1:3000](http://127.0.0.1:3000).
 npm run build:pages
 ```
 
-Output is in the `out/` folder. To preview locally:
+Output is in the `out/` folder. To preview the static build (same as GitHub Pages):
 
 ```bash
-npx serve out -l 3000
+npm run build:pages
+npm run preview:pages
 ```
 
-Then open [http://127.0.0.1:3000/Travel-Planner/](http://127.0.0.1:3000/Travel-Planner/).
+Open [http://127.0.0.1:3000/Travel-Planner/](http://127.0.0.1:3000/Travel-Planner/) — la racine `/` redirige automatiquement.
+
+> **Note :** `preview:pages` simule le déploiement GitHub Pages (sous-chemin `/Travel-Planner/`). Pour coder au quotidien, préférez `npm run dev` qui sert l'app à la racine.
 
 ### Smoke tests
 

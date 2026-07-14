@@ -28,7 +28,7 @@ export default function ThemeToggle() {
       aria-label="Toggle theme"
       type="button"
     >
-      {theme === 'dark' ? <Sun size={16} strokeWidth={1.75} /> : <Moon size={16} strokeWidth={1.75} />}
+      {theme === 'dark' ? <Sun size={18} strokeWidth={2} /> : <Moon size={18} strokeWidth={2} />}
     </button>
   );
 }

@@ -1,10 +1,9 @@
 .tracker {
-  background: hsl(var(--surface));
-  border: 1px solid hsl(var(--border));
-  border-radius: var(--radius-sm);
-  padding: 1rem 1.125rem;
+  border-top: 1px solid hsl(var(--rule));
+  border-bottom: 1px solid hsl(var(--rule));
+  padding: 1.15rem 1.25rem;
   margin: 0 1rem 1.5rem;
-  max-width: 1000px;
+  max-width: var(--content-w);
   margin-left: auto;
   margin-right: auto;
 }
@@ -20,16 +19,14 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: hsl(var(--text-main));
+  font-weight: 700;
+  font-size: 1rem;
   font-family: var(--font-display), Georgia, serif;
 }
 
 .loading {
   animation: spin 0.8s linear infinite;
   opacity: 0.5;
-  color: hsl(var(--text-dim));
 }
 
 @keyframes spin {
@@ -37,99 +34,54 @@
 }
 
 .progressContainer {
-  height: 6px;
-  background: hsl(var(--border) / 0.6);
-  border-radius: 2px;
-  overflow: hidden;
-  margin-bottom: 0.75rem;
+  height: 4px;
+  background: hsl(var(--rule));
+  margin-bottom: 0.85rem;
 }
 
 .progressBar {
   height: 100%;
-  background: hsl(var(--secondary));
-  border-radius: 2px;
-  transition: width 0.4s var(--ease-out), background 0.2s var(--ease-out);
+  background: hsl(var(--stamp));
+  transition: width 0.35s var(--ease-out);
 }
 
 .progressBar.warning {
-  background: hsl(var(--accent));
+  background: hsl(32 70% 42%);
 }
 
 .progressBar.over {
-  background: hsl(4 62% 48%);
+  background: hsl(8 62% 38%);
 }
 
 .details {
   display: flex;
-  gap: 1.5rem;
+  gap: 2rem;
   flex-wrap: wrap;
-}
-
-.spent,
-.remaining,
-.total {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
+  font-size: 0.95rem;
 }
 
 .detailLabel {
-  font-size: 0.68rem;
-  color: hsl(var(--text-dim));
+  display: block;
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  color: hsl(var(--ink-faint));
+  margin-bottom: 0.15rem;
 }
 
 .amount {
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: hsl(var(--text-main));
 }
 
-.okAmount {
-  color: hsl(var(--secondary));
-}
-
-.warningAmount {
-  color: hsl(var(--accent));
-}
-
-.overAmount {
-  color: hsl(4 62% 48%);
-}
-
-.alert {
+.alert,
+.warningAlert {
   margin-top: 0.75rem;
-  padding: 0.5rem 0.75rem;
-  background: hsl(4 62% 48% / 0.08);
-  border: 1px solid hsl(4 62% 48% / 0.25);
-  border-radius: var(--radius-sm);
-  color: hsl(4 62% 42%);
-  font-size: 0.82rem;
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: hsl(var(--stamp));
 }
 
 .warningAlert {
-  margin-top: 0.75rem;
-  padding: 0.5rem 0.75rem;
-  background: hsl(var(--accent) / 0.1);
-  border: 1px solid hsl(var(--accent) / 0.25);
-  border-radius: var(--radius-sm);
-  color: hsl(var(--accent));
-  font-size: 0.82rem;
-  font-weight: 500;
-}
-
-@media (max-width: 480px) {
-  .details {
-    gap: 1rem;
-  }
-
-  .spent,
-  .remaining,
-  .total {
-    flex: 1;
-    min-width: 80px;
-  }
+  color: hsl(32 70% 38%);
 }

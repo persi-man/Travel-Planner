@@ -35,7 +35,6 @@ export default function LanguageSwitcher() {
         type="button"
       >
         <span className={styles.code}>{currentLang.code.toUpperCase()}</span>
-        <span className={styles.chevron}>{isOpen ? '▲' : '▼'}</span>
       </button>
 
       {isOpen && (

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Upload } from 'lucide-react';
 import LocationInput from '@/components/LocationInput';
+import AppHeader from '@/components/AppHeader';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { createTrip } from '@/lib/db';
 import styles from './page.module.css';
@@ -14,7 +15,7 @@ export default function NewTripPage() {
   const endDateRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const [form, setForm] = useState({
     title: '',
@@ -70,7 +71,11 @@ export default function NewTripPage() {
   return (
     <main className={styles.main}>
       <div className={styles.container}>
-        <h1 className={`${styles.title} display-title`}>{t('trip.createTitle')}</h1>
+        <div className={styles.topRow}>
+          <Link href="/" className={styles.backLink}>← {t('common.back')}</Link>
+          <AppHeader />
+        </div>
+        <h1 className={styles.title}>{t('trip.createTitle')}</h1>
 
         <form onSubmit={handleSubmit} className={styles.formCard}>
           <div className={styles.field}>
@@ -94,6 +99,7 @@ export default function NewTripPage() {
               placeholder={t('trip.destinationPlaceholder')}
               required
               className={styles.input}
+              language={language}
             />
           </div>
 

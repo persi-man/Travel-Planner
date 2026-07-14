@@ -1,76 +1,72 @@
 :root {
-  /* Carnet de voyage — warm ink on parchment */
-  --primary: 18 48% 40%;
-  --primary-dark: 18 48% 32%;
-  --secondary: 152 18% 34%;
-  --accent: 32 72% 44%;
-  --background: 38 32% 95%;
-  --surface: 40 38% 98%;
-  --card: 40 38% 98%;
-  --text-main: 24 14% 16%;
-  --text-dim: 24 8% 44%;
-  --border: 32 16% 80%;
-  --ink-muted: 24 6% 58%;
+  /* Registre — carnet éditorial, pas dashboard SaaS */
+  --ink: 25 12% 12%;
+  --ink-muted: 25 6% 40%;
+  --ink-faint: 25 5% 55%;
+  --paper: 38 28% 93%;
+  --paper-raised: 40 32% 96%;
+  --rule: 34 12% 78%;
+  --stamp: 5 58% 36%;
+  --stamp-hover: 5 58% 28%;
+  --stamp-fg: 40 32% 96%;
 
-  --shadow-sm: 0 1px 2px hsl(24 14% 16% / 0.04);
-  --shadow-md: 0 2px 8px hsl(24 14% 16% / 0.06);
-  --shadow-lg: 0 8px 24px hsl(24 14% 16% / 0.08);
+  --background: var(--paper);
+  --surface: var(--paper-raised);
+  --card: var(--paper-raised);
+  --elevated: var(--paper);
+  --text-main: var(--ink);
+  --text-dim: var(--ink-muted);
+  --text-muted: var(--ink-faint);
+  --border: var(--rule);
+  --primary: var(--stamp);
+  --primary-dark: var(--stamp-hover);
+  --primary-fg: var(--stamp-fg);
+  --focus-ring: var(--stamp);
 
-  --radius-sm: 3px;
-  --radius-md: 6px;
-  --radius-lg: 10px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
 
-  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-out: cubic-bezier(0.25, 0.8, 0.25, 1);
+  --content-w: 42rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --background: 24 11% 9%;
-    --surface: 24 9% 13%;
-    --card: 24 9% 15%;
-    --text-main: 38 22% 90%;
-    --text-dim: 30 8% 58%;
-    --border: 24 7% 22%;
-    --ink-muted: 30 6% 48%;
-    --primary: 22 52% 58%;
-    --primary-dark: 22 52% 48%;
-    --secondary: 152 16% 48%;
-    --accent: 32 60% 52%;
-    --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.2);
-    --shadow-md: 0 2px 8px hsl(0 0% 0% / 0.25);
-    --shadow-lg: 0 8px 24px hsl(0 0% 0% / 0.3);
+    --ink: 40 18% 90%;
+    --ink-muted: 35 10% 68%;
+    --ink-faint: 30 8% 52%;
+    --paper: 24 10% 9%;
+    --paper-raised: 24 8% 12%;
+    --rule: 24 8% 22%;
+    --stamp: 12 55% 58%;
+    --stamp-hover: 12 55% 50%;
+    --stamp-fg: 24 10% 9%;
   }
 }
 
 [data-theme='dark'] {
-  --background: 24 11% 9%;
-  --surface: 24 9% 13%;
-  --card: 24 9% 15%;
-  --text-main: 38 22% 90%;
-  --text-dim: 30 8% 58%;
-  --border: 24 7% 22%;
-  --ink-muted: 30 6% 48%;
-  --primary: 22 52% 58%;
-  --primary-dark: 22 52% 48%;
-  --secondary: 152 16% 48%;
-  --accent: 32 60% 52%;
-  --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.2);
-  --shadow-md: 0 2px 8px hsl(0 0% 0% / 0.25);
-  --shadow-lg: 0 8px 24px hsl(0 0% 0% / 0.3);
+  --ink: 40 18% 90%;
+  --ink-muted: 35 10% 68%;
+  --ink-faint: 30 8% 52%;
+  --paper: 24 10% 9%;
+  --paper-raised: 24 8% 12%;
+  --rule: 24 8% 22%;
+  --stamp: 12 55% 58%;
+  --stamp-hover: 12 55% 50%;
+  --stamp-fg: 24 10% 9%;
 }
 
 [data-theme='light'] {
-  --primary: 18 48% 40%;
-  --primary-dark: 18 48% 32%;
-  --secondary: 152 18% 34%;
-  --accent: 32 72% 44%;
-  --background: 38 32% 95%;
-  --surface: 40 38% 98%;
-  --card: 40 38% 98%;
-  --text-main: 24 14% 16%;
-  --text-dim: 24 8% 44%;
-  --border: 32 16% 80%;
-  --ink-muted: 24 6% 58%;
+  --ink: 24 10% 10%;
+  --ink-muted: 24 6% 38%;
+  --ink-faint: 24 5% 52%;
+  --paper: 40 33% 94%;
+  --paper-raised: 40 40% 97%;
+  --rule: 35 14% 82%;
+  --stamp: 8 62% 38%;
+  --stamp-hover: 8 62% 30%;
+  --stamp-fg: 40 40% 97%;
 }
 
 * {
@@ -80,25 +76,32 @@
 }
 
 body {
-  font-family: var(--font-sans), system-ui, sans-serif;
-  background-color: hsl(var(--background));
-  color: hsl(var(--text-main));
+  font-family: var(--font-sans), Georgia, serif;
+  font-size: 1.0625rem;
+  background-color: hsl(var(--paper));
+  color: hsl(var(--ink));
   min-height: 100vh;
-  line-height: 1.55;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
-  background-image:
-    linear-gradient(hsl(var(--border) / 0.35) 1px, transparent 1px),
-    linear-gradient(90deg, hsl(var(--border) / 0.2) 1px, transparent 1px);
-  background-size: 100% 2.5rem, 2.5rem 100%;
-  background-position: 0 1.25rem, 0 0;
-  transition: background-color 0.25s var(--ease-out), color 0.25s var(--ease-out);
+  position: relative;
 }
 
-[data-theme='dark'] body,
-:root:not([data-theme='light']) body {
-  background-image:
-    linear-gradient(hsl(var(--border) / 0.25) 1px, transparent 1px),
-    linear-gradient(90deg, hsl(var(--border) / 0.12) 1px, transparent 1px);
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 180px 180px;
+  mix-blend-mode: multiply;
+}
+
+[data-theme='dark'] body::before {
+  opacity: 0.12;
+  mix-blend-mode: soft-light;
 }
 
 a {
@@ -110,89 +113,55 @@ button {
   cursor: pointer;
   border: none;
   font-family: inherit;
+  background: none;
 }
 
 button:active:not(:disabled) {
-  transform: scale(0.97);
+  opacity: 0.85;
 }
 
-/* Display headings — serif, no gradient */
 .display-title {
   font-family: var(--font-display), Georgia, serif;
-  font-weight: 500;
-  color: hsl(var(--text-main));
+  font-weight: 700;
+  color: hsl(var(--ink));
   letter-spacing: -0.02em;
-  line-height: 1.15;
-}
-
-.panel {
-  background-color: hsl(var(--surface));
-  border: 1px solid hsl(var(--border));
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-.card {
-  background-color: hsl(var(--surface));
-  border-radius: var(--radius-lg);
-  border: 1px solid hsl(var(--border));
-  box-shadow: var(--shadow-sm);
-  transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
-  overflow: hidden;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .card:hover {
-    border-color: hsl(var(--primary) / 0.35);
-    box-shadow: var(--shadow-md);
-  }
+  line-height: 1.1;
 }
 
 input,
 select,
 textarea {
-  background-color: hsl(var(--surface));
-  color: hsl(var(--text-main));
-  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--paper-raised));
+  color: hsl(var(--ink));
+  border: 1px solid hsl(var(--rule));
   border-radius: var(--radius-sm);
+  font-size: 1.0625rem;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: hsl(var(--text-dim));
+  color: hsl(var(--ink-faint));
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-  outline: none;
-  border-color: hsl(var(--primary));
-  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.12);
+  outline: 2px solid hsl(var(--stamp));
+  outline-offset: 1px;
 }
 
-input[type="date"]::-webkit-calendar-picker-indicator,
-input[type="time"]::-webkit-calendar-picker-indicator {
-  filter: invert(0);
-  opacity: 0.6;
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2357534e' stroke-width='2' stroke-linecap='square'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 0.9rem;
+  padding-right: 2.5rem;
 }
 
 [data-theme='dark'] input[type="date"]::-webkit-calendar-picker-indicator,
 [data-theme='dark'] input[type="time"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
-  opacity: 0.7;
-}
-
-select {
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235a5248' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 1rem;
-  padding-right: 2.5rem;
-}
-
-[data-theme='dark'] select {
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c4b8a8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -200,7 +169,6 @@ select {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }

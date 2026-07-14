@@ -2,13 +2,19 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import { Upload, MapPin, CalendarDays } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useLanguage } from '@/i18n/LanguageContext';
 import LocalDataBanner from '@/components/LocalDataBanner';
+import AppHeader from '@/components/AppHeader';
 import { listTrips, createTrip, createActivity, type TripListItem } from '@/lib/db';
-import { isSafeImageSrc, validateImportFile, validateImportRowCount } from '@/lib/validation';
+import { validateImportFile, validateImportRowCount } from '@/lib/validation';
 import styles from './page.module.css';
+
+function formatDestination(destination: string) {
+  const parts = destination.split(',').map((p) => p.trim()).filter(Boolean);
+  if (parts.length <= 2) return destination;
+  return `${parts[0]}, ${parts[1]}`;
+}
 
 // Helper function to extract text from PDF
 const extractPDFText = async (arrayBuffer: ArrayBuffer): Promise<string> => {
@@ -385,27 +391,27 @@ export default function Home() {
   return (
     <main className={styles.main}>
       <div className={styles.container}>
-        <header className={styles.header}>
-          <div>
-            <h1 className={`${styles.title} display-title`}>{t('home.title')}</h1>
-            <p className={styles.subtitle}>{t('home.subtitle')}</p>
-          </div>
-          <div className={styles.headerActions}>
-            <label className={styles.importButton} style={{ cursor: 'pointer' }}>
-              <Upload size={18} /> {t('home.importTrip')}
-              <input 
-                type="file" 
-                ref={importFileRef}
-                accept=".json,.md,.txt,.csv,.xlsx,.xls,.pdf"
-                style={{display:'none'}}
-                onChange={handleImportTrip}
-              />
-            </label>
-            <Link href="/trips/new" className={styles.newButton}>
-              + {t('home.newTrip')}
-            </Link>
-          </div>
-        </header>
+        <div className={styles.topRow}>
+          <h1 className={styles.title}>{t('home.title')}</h1>
+          <AppHeader />
+        </div>
+
+        <div className={styles.toolbar}>
+          <Link href="/trips/new" className={styles.newButton}>
+            {t('home.newTrip')}
+          </Link>
+          <span className={styles.sep} aria-hidden>·</span>
+          <label className={styles.importButton}>
+            {t('home.importTrip')}
+            <input
+              type="file"
+              ref={importFileRef}
+              accept=".json,.md,.txt,.csv,.xlsx,.xls,.pdf"
+              style={{ display: 'none' }}
+              onChange={handleImportTrip}
+            />
+          </label>
+        </div>
 
         <LocalDataBanner />
 
@@ -421,35 +427,46 @@ export default function Home() {
             </Link>
           </div>
         ) : (
-          <div className={styles.grid}>
-            {trips.map((trip) => (
-              <Link href={`/trips/${trip.id}`} key={trip.id} className={styles.card}>
-                <div className={styles.cardImage}>
-                  {trip.coverImage && isSafeImageSrc(trip.coverImage) ? (
-                    <img src={trip.coverImage} alt={trip.title} />
-                  ) : (
-                    <div className={styles.cardImagePlaceholder} />
-                  )}
-                  <div className={styles.dateBadge}>
-                    {new Date(trip.startDate).toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US')} - {new Date(trip.endDate).toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US')}
-                  </div>
-                </div>
-                <div className={styles.cardContent}>
-                  <h3 className={styles.cardTitle}>{trip.title}</h3>
-                  <div className={styles.cardMeta}>
-                    <span className={styles.metaItem}>
-                      <MapPin size={13} strokeWidth={1.75} />
-                      {trip.destination}
+          <ul className={styles.tripList}>
+            {trips.map((trip, index) => {
+              const days = Math.ceil(
+                (new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) /
+                  (1000 * 60 * 60 * 24)
+              );
+              const dateFmt = language === 'fr' ? 'fr-FR' : 'en-US';
+              const start = new Date(trip.startDate).toLocaleDateString(dateFmt, {
+                day: 'numeric',
+                month: 'short',
+              });
+              const end = new Date(trip.endDate).toLocaleDateString(dateFmt, {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+              });
+
+              return (
+                <li key={trip.id}>
+                  <Link href={`/trips/${trip.id}`} className={styles.tripRow}>
+                    <span className={styles.tripIndex} aria-hidden>
+                      {String(index + 1).padStart(2, '0')}
                     </span>
-                    <span className={styles.metaItem}>
-                      <CalendarDays size={13} strokeWidth={1.75} />
-                      {Math.ceil((new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24))} {t('home.tripCard.days')}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                    <div className={styles.tripBody}>
+                      <div className={styles.tripName}>{trip.title}</div>
+                      <div className={styles.tripMeta}>
+                        {formatDestination(trip.destination)}
+                        {' · '}
+                        {days} {t('home.tripCard.days')}
+                      </div>
+                      <span className={styles.tripDates}>
+                        {start} → {end}
+                      </span>
+                    </div>
+                    <span className={styles.tripArrow} aria-hidden>→</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
         )}
       </div>
     </main>

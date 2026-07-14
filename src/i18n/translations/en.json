@@ -19,12 +19,13 @@
     "backToDashboard": "Back to Dashboard"
   },
   "home": {
-    "title": "Travel Planner",
-    "subtitle": "Plan your next adventure in style.",
-    "newTrip": "New Trip",
-    "importTrip": "Import Trip",
-    "noTrips": "No trips yet. Create your first adventure!",
-    "localDataNotice": "Your trips are stored locally in this browser. Export regularly as JSON to back up your data.",
+    "title": "Trips",
+    "subtitle": "",
+    "newTrip": "New trip",
+    "importTrip": "Import",
+    "localDataTitle": "Local storage.",
+    "noTrips": "No trips recorded.",
+    "localDataNotice": "Stored locally in this browser — export to JSON occasionally.",
     "tripCard": {
       "days": "days",
       "budget": "Budget"
