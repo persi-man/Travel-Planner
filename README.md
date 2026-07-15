@@ -28,6 +28,14 @@ Captured from the app running locally (`npm run dev`) with demo data.
 
 ![Travel Planner trip detail](public/assets/demo-detail.png)
 
+### PDF export — printable itinerary
+
+Exported via **Exporter → PDF** (`Visite_africaine_itinerary.pdf`).
+
+| Cover + summary | Day-by-day activities |
+|-----------------|----------------------|
+| ![PDF cover](public/assets/pdf-demo/page-01-cover.png) | ![PDF itinerary](public/assets/pdf-demo/page-03-itinerary-start.png) |
+
 ## Features
 
 ### Trip planning

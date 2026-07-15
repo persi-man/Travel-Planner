@@ -521,7 +521,7 @@ function drawActivityCard(
   return y + cardHeight + 5;
 }
 
-export async function generateTripPdf(trip: Trip, language: ExportLanguage): Promise<void> {
+export async function buildTripPdf(trip: Trip, language: ExportLanguage): Promise<jsPDF> {
   const doc = new jsPDF();
   const L = labels(language);
   const loc = locale(language);
@@ -619,5 +619,15 @@ export async function generateTripPdf(trip: Trip, language: ExportLanguage): Pro
     drawPageFooter(doc, i, pageCount, logoPng, language);
   }
 
+  return doc;
+}
+
+export async function generateTripPdf(trip: Trip, language: ExportLanguage): Promise<void> {
+  const doc = await buildTripPdf(trip, language);
   doc.save(`${trip.title.replace(/\s+/g, '_')}_itinerary.pdf`);
+}
+
+export async function generateTripPdfBytes(trip: Trip, language: ExportLanguage): Promise<ArrayBuffer> {
+  const doc = await buildTripPdf(trip, language);
+  return doc.output('arraybuffer') as ArrayBuffer;
 }
